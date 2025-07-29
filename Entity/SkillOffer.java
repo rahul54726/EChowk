@@ -24,4 +24,5 @@ public class SkillOffer {
     private  Skill skill;
 
     private String description;
+    private boolean available = true;
 }

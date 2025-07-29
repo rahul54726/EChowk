@@ -29,7 +29,10 @@ public class SecurityConfiguration {
         http
                 .csrf(csrf -> csrf.disable()) // ✅ Spring Security 6.1+ syntax
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/login", "/users/register", "/health").permitAll()
+                        .requestMatchers("/auth/**",
+                                "/users/register",
+                                "/offers/**",
+                                "/requests/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

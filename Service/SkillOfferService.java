@@ -22,4 +22,10 @@ public class SkillOfferService {
     public List<SkillOffer> getAllOffers(){
         return skillOfferRepo.findAll();
     }
+    public List<SkillOffer> getAvailableOffers(){
+        return skillOfferRepo.findByAvailableTrue();
+    }
+    public List<SkillOffer> getAvailableOffersByUser(String userId) {
+        return skillOfferRepo.findByUserIdAndAvailableTrue(userId);
+    }
 }

@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface SkillOfferRepo extends MongoRepository <SkillOffer,String> {
     List<SkillOffer> findByUserId(String userId);
+    List<SkillOffer> findByAvailableTrue();
+    List<SkillOffer> findByUserIdAndAvailableTrue(String userId);
 }
