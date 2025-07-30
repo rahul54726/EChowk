@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/request")
+@RequestMapping("/skillrequests")
 public class SkillRequestController {
 
     private final SkillRequestService skillRequestService;
