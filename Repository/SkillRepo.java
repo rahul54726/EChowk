@@ -11,4 +11,5 @@ public interface SkillRepo extends MongoRepository<Skill,String> {
     List<Skill> findByUser(User user);
     List<Skill> findByUserAndType(User user,String type);
     List<Skill> findByUserId(String userId);
+    int countByUserId(String userId);
 }

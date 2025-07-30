@@ -1,8 +1,10 @@
 package com.EChowk.EChowk.utils;
 
+import com.EChowk.EChowk.Entity.Request;
 import com.EChowk.EChowk.Entity.Skill;
 import com.EChowk.EChowk.Entity.SkillOffer;
 import com.EChowk.EChowk.Entity.User;
+import com.EChowk.EChowk.dto.RequestDto;
 import com.EChowk.EChowk.dto.SkillDto;
 import com.EChowk.EChowk.dto.SkillOfferDto;
 import com.EChowk.EChowk.dto.UserDto;
@@ -31,6 +33,14 @@ public class DtoMapper {
                 .skill(toSkillDto(offer.getSkill()))
                 .user(toUserDto(offer.getUser()))
                 .available(offer.isAvailable())
+                .build();
+    }
+    public static RequestDto toRequestDto(Request request) {
+        return RequestDto.builder()
+                .id(request.getId())
+                .status(request.getStatus())
+                .requester(toUserDto(request.getRequester()))
+                .skillOffer(toSkillOfferDto(request.getSkillOffer()))
                 .build();
     }
 }

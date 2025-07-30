@@ -1,7 +1,11 @@
 package com.EChowk.EChowk.Service;
 
 import com.EChowk.EChowk.Entity.User;
+import com.EChowk.EChowk.Repository.SkillOfferRepo;
+import com.EChowk.EChowk.Repository.SkillRepo;
+import com.EChowk.EChowk.Repository.SkillRequestRepo;
 import com.EChowk.EChowk.Repository.UserRepo;
+import com.EChowk.EChowk.dto.DashboardStatsDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -12,8 +16,16 @@ import java.util.Optional;
 @Slf4j
 @Service
 public class UserService {
+    @Autowired
     private final UserRepo userRepo;
+    @Autowired
+    private SkillRepo skillRepo;
+    @Autowired
     private final PasswordEncoder passwordEncoder;
+    @Autowired
+    private SkillOfferRepo skillOfferRepo;
+    @Autowired
+    private SkillRequestRepo requestRepo;
 
     @Autowired
     public UserService(UserRepo userRepo, PasswordEncoder passwordEncoder) {
@@ -40,5 +52,18 @@ public class UserService {
     }
     public void deleteUser(String id){
          userRepo.deleteById(id);
+    }
+    public DashboardStatsDto getDashoardStats(String userId){
+        int totalSKills = skillRepo.countByUserId(userId);
+        int totalOffers = skillOfferRepo.findByUserId(userId).size();
+        int totalRequest = requestRepo.findByUserId(userId).size();
+        double averageRating = userRepo.findById(userId)
+                .map(User::getAverageRating).orElse(0.0);
+        return DashboardStatsDto.builder()
+                .totalSkills(totalSKills)
+                .totalOffers(totalOffers)
+                .totalRequests(totalRequest)
+                .averageRating(averageRating)
+                .build();
     }
 }
