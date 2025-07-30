@@ -8,7 +8,6 @@ import com.EChowk.EChowk.Repository.SkillOfferRepo;
 import com.EChowk.EChowk.Repository.UserRepo;
 import com.EChowk.EChowk.dto.RequestCreationDto;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,11 +15,9 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class RequestService {
-    @Autowired
+
     private final RequestRepo requestRepo;
-    @Autowired
     private final SkillOfferRepo skillOfferRepo;
-    @Autowired
     private final UserRepo userRepo;
 
     // ✅ Create a new request
@@ -41,15 +38,15 @@ public class RequestService {
 
     // ✅ Get all requests made by a specific user
     public List<Request> getRequestsByUser(String userId) {
-        return requestRepo.findByRequesterId(userId);
+        return requestRepo.findByRequester_Id(userId);  // This must match the method name in your repo
     }
 
-    // ✅ Get all requests for a specific skill offer (for owner to view)
+    // ✅ Get all requests for a specific skill offer (for offer owner)
     public List<Request> getRequestsByOffer(String offerId) {
-        return requestRepo.findBySkillOfferId(offerId);
+        return requestRepo.findBySkillOffer_Id(offerId);
     }
 
-    // ✅ Update the status of a request (ACCEPTED or REJECTED)
+    // ✅ Update the status of a request (ACCEPTED / REJECTED)
     public void updateRequestStatus(String requestId, String status) {
         Request request = requestRepo.findById(requestId)
                 .orElseThrow(() -> new RuntimeException("Request not found"));

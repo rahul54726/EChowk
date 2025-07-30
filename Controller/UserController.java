@@ -2,6 +2,7 @@ package com.EChowk.EChowk.Controller;
 
 import com.EChowk.EChowk.Entity.User;
 import com.EChowk.EChowk.Service.UserService;
+import com.EChowk.EChowk.dto.UserDto;
 import com.EChowk.EChowk.utils.DtoMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,35 +16,43 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/users")
 public class UserController {
+
     private final UserService userService;
 
     @Autowired
     public UserController(UserService userService) {
         this.userService = userService;
     }
+
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody User user){
+    public ResponseEntity<?> registerUser(@RequestBody User user) {
         try {
-            User created = userService.registeruser(user);
-            return new ResponseEntity<>(user,HttpStatus.OK);
-        }catch (RuntimeException e){
-            log.warn("Something Wrong while Registering User",e);
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            User created = userService.registerUser(user);
+            return new ResponseEntity<>(created, HttpStatus.CREATED);
+        } catch (RuntimeException e) {
+            log.warn("Something went wrong while registering user", e);
+            return new ResponseEntity<>("Email already exists", HttpStatus.BAD_REQUEST);
         }
     }
-    @GetMapping("/{id}")
-    public ResponseEntity<?> getUserById(@PathVariable String id){
-        User user = userService.getUserById(id).orElseThrow(() -> new RuntimeException("User Not found"));
-        return new ResponseEntity<>(DtoMapper.toUserDto(user),HttpStatus.OK);
+
+    @GetMapping("/by-id/{id}")
+    public ResponseEntity<?> getUserById(@PathVariable String id) {
+        User user = userService.getUserById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return new ResponseEntity<>(DtoMapper.toUserDto(user), HttpStatus.OK);
     }
-    @GetMapping("/{email}")
-    public ResponseEntity<?> getUserByEmail(@PathVariable String email){
-        Optional<User> user = userService.getUserByEmail(email);
-        return user.map(u -> new ResponseEntity<>(u,HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+
+    @GetMapping("/by-email/{email}")
+    public ResponseEntity<UserDto> getUserByEmail(@PathVariable String email) {
+        User user = userService.getUserByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return new ResponseEntity<>(DtoMapper.toUserDto(user), HttpStatus.OK);
     }
+
+
     @DeleteMapping("/{id}")
-    public  ResponseEntity<?> deleteUser(@PathVariable String id){
+    public ResponseEntity<?> deleteUser(@PathVariable String id) {
         userService.deleteUser(id);
-        return new ResponseEntity<>("User Deleted",HttpStatus.OK);
+        return new ResponseEntity<>("User deleted successfully", HttpStatus.OK);
     }
 }

@@ -5,7 +5,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.List;
 
-public interface RequestRepo extends MongoRepository<Request,String> {
-    List<Request> findByRequesterId(String requesterId);
-    List<Request> findBySkillOfferId(String offerId);
+public interface RequestRepo extends MongoRepository<Request, String> {
+    List<Request> findByRequester_Id(String requesterId);
+    List<Request> findBySkillOffer_Id(String skillOfferId);
 }
