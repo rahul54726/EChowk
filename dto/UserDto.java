@@ -15,6 +15,6 @@ public class UserDto {
     private String email;
     private String location;
     private String bio;
-    private String averageRating;
+    private double averageRating;
 
 }

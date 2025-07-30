@@ -5,6 +5,7 @@ import com.EChowk.EChowk.Entity.User;
 import com.EChowk.EChowk.Repository.SkillRepo;
 import com.EChowk.EChowk.Repository.UserRepo;
 import com.EChowk.EChowk.Service.SkillService;
+import com.EChowk.EChowk.utils.DtoMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/skills")
@@ -31,9 +33,9 @@ public class SkillController {
         Skill savedSkill = skillService.addSkill(email,skill);
         return new ResponseEntity<>(savedSkill,HttpStatus.OK);
     }
-    @GetMapping("user/{userID}")
-    public ResponseEntity<?> getSkillsByUser(@PathVariable String userID){
-        List<Skill> skills = skillService.getSkillByUser(userID);
+    @GetMapping("user/{userId}")
+    public ResponseEntity<?> getSkillsByUser(@PathVariable String userId){
+        List<Skill> skills = skillService.getSkillByUser(userId);
         return new ResponseEntity<>(skills,HttpStatus.OK);
     }
     @GetMapping("/user/{userID}/type/{type}")

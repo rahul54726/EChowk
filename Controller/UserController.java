@@ -2,6 +2,7 @@ package com.EChowk.EChowk.Controller;
 
 import com.EChowk.EChowk.Entity.User;
 import com.EChowk.EChowk.Service.UserService;
+import com.EChowk.EChowk.utils.DtoMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -32,12 +33,8 @@ public class UserController {
     }
     @GetMapping("/{id}")
     public ResponseEntity<?> getUserById(@PathVariable String id){
-        Optional<User> user = userService.getUserById(id);
-        if(user.isPresent()){
-            return new ResponseEntity<>(user.get(),HttpStatus.OK);
-        }else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        User user = userService.getUserById(id).orElseThrow(() -> new RuntimeException("User Not found"));
+        return new ResponseEntity<>(DtoMapper.toUserDto(user),HttpStatus.OK);
     }
     @GetMapping("/{email}")
     public ResponseEntity<?> getUserByEmail(@PathVariable String email){

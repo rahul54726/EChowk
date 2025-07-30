@@ -28,4 +28,7 @@ public class SkillService {
         User user = userRepo.findByEmail(userID).orElseThrow(() -> new RuntimeException("User Not Found"));
         return skillRepo.findByUserAndType(user,type.toUpperCase());
     }
+    public List<Skill> getAllSkills(){
+        return skillRepo.findAll();
+    }
 }

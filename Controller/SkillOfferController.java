@@ -2,11 +2,16 @@ package com.EChowk.EChowk.Controller;
 
 import com.EChowk.EChowk.Entity.SkillOffer;
 import com.EChowk.EChowk.Service.SkillOfferService;
+import com.EChowk.EChowk.dto.SkillOfferDto;
+import com.EChowk.EChowk.utils.DtoMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 
@@ -23,11 +28,15 @@ public class SkillOfferController {
     }
     @GetMapping("/user/{userId}")
     public ResponseEntity<?> getOffersByUser(@PathVariable String userId){
-        return new ResponseEntity<>(skillOfferService.getOfferByUserId(userId),HttpStatus.OK);
+        return new ResponseEntity<>(skillOfferService.getOfferByUserId(userId).stream()
+                .map(DtoMapper::toSkillOfferDto)
+                .collect(Collectors.toList()),HttpStatus.OK);
     }
     @GetMapping
-    public ResponseEntity<?> getAllOffers(){
-        return  new ResponseEntity<>(skillOfferService.getAllOffers(),HttpStatus.OK);
+    public ResponseEntity<?> getAllSkillOffers() {
+        return new ResponseEntity<>(skillOfferService.getAllOffers().stream()
+                .map(DtoMapper::toSkillOfferDto)
+                .collect(Collectors.toList()),HttpStatus.OK);
     }
     @GetMapping("/available")
     public ResponseEntity<?> getAvailableOffers(){
