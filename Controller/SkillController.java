@@ -1,46 +1,34 @@
 package com.EChowk.EChowk.Controller;
 
-import com.EChowk.EChowk.Entity.Skill;
-import com.EChowk.EChowk.Entity.User;
-import com.EChowk.EChowk.Repository.SkillRepo;
-import com.EChowk.EChowk.Repository.UserRepo;
 import com.EChowk.EChowk.Service.SkillService;
+import com.EChowk.EChowk.dto.SkillDto;
 import com.EChowk.EChowk.utils.DtoMapper;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/skills")
+@RequiredArgsConstructor
 public class SkillController {
-    @Autowired
-    private SkillRepo skillRepo;
-    @Autowired
-    private UserRepo userRepo;
+
     private final SkillService skillService;
-    @Autowired
-    public SkillController(SkillService skillService) {
-        this.skillService = skillService;
+
+    @GetMapping
+    public ResponseEntity<List<SkillDto>> getAllSkills() {
+        List<SkillDto> skillDtos = skillService.getAllSkills().stream()
+                .map(DtoMapper::toSkillDto)
+                .collect(Collectors.toList());
+        return new ResponseEntity<>(skillDtos, HttpStatus.OK);
     }
 
-    @PostMapping("/add/{email}")
-    public ResponseEntity<?> addSkill(@PathVariable String email, @RequestBody Skill skill){
-        Skill savedSkill = skillService.addSkill(email,skill);
-        return new ResponseEntity<>(savedSkill,HttpStatus.OK);
-    }
-    @GetMapping("user/{userId}")
-    public ResponseEntity<?> getSkillsByUser(@PathVariable String userId){
-        List<Skill> skills = skillService.getSkillByUser(userId);
-        return new ResponseEntity<>(skills,HttpStatus.OK);
-    }
-    @GetMapping("/user/{userID}/type/{type}")
-    public ResponseEntity<?> getSkillsByType(@PathVariable String userID, @PathVariable String type) {
-        List<Skill> skills = skillService.getSkillByType(userID,type);
-        return new ResponseEntity<>(skills,HttpStatus.OK);
+    @PostMapping
+    public ResponseEntity<SkillDto> createSkill(@RequestBody SkillDto skillDto) {
+        SkillDto created = skillService.createSkill(skillDto);
+        return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 }

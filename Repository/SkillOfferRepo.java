@@ -5,8 +5,8 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.List;
 
-public interface SkillOfferRepo extends MongoRepository <SkillOffer,String> {
+public interface SkillOfferRepo extends MongoRepository<SkillOffer, String> {
     List<SkillOffer> findByUserId(String userId);
-    List<SkillOffer> findByAvailableTrue();
-    List<SkillOffer> findByUserIdAndAvailableTrue(String userId);
+    List<SkillOffer> findByAvailability(boolean availability);
+    List<SkillOffer> findByUserIdAndAvailability(String userId, boolean availability);
 }

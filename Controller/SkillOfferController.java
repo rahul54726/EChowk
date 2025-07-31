@@ -12,9 +12,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5173"})
 @RestController
-
 @RequestMapping("/offers")
 @RequiredArgsConstructor
 public class SkillOfferController {
@@ -22,9 +21,9 @@ public class SkillOfferController {
     private final SkillOfferService skillOfferService;
 
     @PostMapping
-    public ResponseEntity<?> createOffer(@RequestBody SkillOffer offer){
-        SkillOffer saved = skillOfferService.createOffer(offer);
-        return new ResponseEntity<>(saved, HttpStatus.OK);
+    public ResponseEntity<?> createOffer(@RequestBody SkillOfferDto offerDto) {
+        SkillOffer saved = skillOfferService.createOffer(DtoMapper.toSkillOffer(offerDto));
+        return new ResponseEntity<>(DtoMapper.toSkillOfferDto(saved), HttpStatus.OK);
     }
     @GetMapping("/user/{userId}")
     public ResponseEntity<?> getOffersByUser(@PathVariable String userId){

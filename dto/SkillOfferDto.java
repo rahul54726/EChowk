@@ -1,9 +1,6 @@
 package com.EChowk.EChowk.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Data
 @AllArgsConstructor
@@ -11,7 +8,20 @@ import lombok.NoArgsConstructor;
 @Builder
 public class SkillOfferDto {
     private String id;
-    private SkillDto skill;
-    private UserDto user;
-    private boolean available;
+    private String title;
+    private String description;
+
+    private String skillId;
+    private String skillName;
+
+    private String userId;
+    private String userName;
+    private String userAvatar;
+
+    private boolean availability;
+    private int maxStudents;
+    private int currentStudents;
+
+    private String status;
+    private String createdAt;
 }
