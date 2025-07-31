@@ -1,5 +1,6 @@
 package com.EChowk.EChowk.Controller;
 
+import com.EChowk.EChowk.Entity.Skill;
 import com.EChowk.EChowk.Service.SkillService;
 import com.EChowk.EChowk.dto.SkillDto;
 import com.EChowk.EChowk.utils.DtoMapper;
@@ -19,16 +20,22 @@ public class SkillController {
     private final SkillService skillService;
 
     @GetMapping
-    public ResponseEntity<List<SkillDto>> getAllSkills() {
-        List<SkillDto> skillDtos = skillService.getAllSkills().stream()
+    public ResponseEntity<?> getAllSkills() {
+        List<SkillDto> skills = skillService.getAllSkills()
+                .stream()
                 .map(DtoMapper::toSkillDto)
                 .collect(Collectors.toList());
-        return new ResponseEntity<>(skillDtos, HttpStatus.OK);
+        return new ResponseEntity<>(skills, HttpStatus.OK);
     }
 
     @PostMapping
     public ResponseEntity<SkillDto> createSkill(@RequestBody SkillDto skillDto) {
-        SkillDto created = skillService.createSkill(skillDto);
-        return new ResponseEntity<>(created, HttpStatus.CREATED);
+        Skill saved = skillService.saveSkill(
+                Skill.builder()
+                        .name(skillDto.getName())
+                        .type(skillDto.getType())
+                        .build()
+        );
+        return new ResponseEntity<>(DtoMapper.toSkillDto(saved), HttpStatus.CREATED);
     }
 }
