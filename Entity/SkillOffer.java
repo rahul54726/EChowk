@@ -35,7 +35,9 @@ public class SkillOffer {
     private Integer currentStudents = 0;
 
     private String status = "OPEN";
-
+    //Fields for Rating
+    private double averageRating = 0.0d;
+    private int numReviews = 0 ;
     @CreatedDate
     private LocalDateTime createdAt = LocalDateTime.now();
 

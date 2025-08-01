@@ -24,4 +24,7 @@ public class SkillOfferDto {
 
     private String status;
     private String createdAt;
+
+    private double averageRating;
+    private  int numReviews;
 }

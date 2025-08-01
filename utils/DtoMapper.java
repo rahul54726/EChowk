@@ -1,13 +1,7 @@
 package com.EChowk.EChowk.utils;
 
-import com.EChowk.EChowk.Entity.Request;
-import com.EChowk.EChowk.Entity.Skill;
-import com.EChowk.EChowk.Entity.SkillOffer;
-import com.EChowk.EChowk.Entity.User;
-import com.EChowk.EChowk.dto.RequestDto;
-import com.EChowk.EChowk.dto.SkillDto;
-import com.EChowk.EChowk.dto.SkillOfferDto;
-import com.EChowk.EChowk.dto.UserDto;
+import com.EChowk.EChowk.Entity.*;
+import com.EChowk.EChowk.dto.*;
 
 import java.time.LocalDateTime;
 
@@ -54,6 +48,8 @@ public class DtoMapper {
                 .currentStudents(offer.getCurrentStudents())
                 .status(offer.getStatus())
                 .createdAt(offer.getCreatedAt() != null ? offer.getCreatedAt().toString() : null)
+                .averageRating(offer.getAverageRating())
+                .numReviews(offer.getNumReviews())
                 .build();
     }
 
@@ -82,5 +78,17 @@ public class DtoMapper {
                 .requester(toUserDto(request.getRequester()))
                 .skillOffer(toSkillOfferDto(request.getSkillOffer()))
                 .build();
+    }
+    public static ReviewDto toReviewDto(Review review){
+        return ReviewDto.builder()
+                .id(review.getId())
+                .reviewerId(review.getReviewer().getId())
+                .reviewerName(review.getReviewer().getName())
+                .skillOfferId(review.getSkillOffer().getId())
+                .rating(review.getRating())
+                .comment(review.getContent())
+                .createdAt(review.getCreatedAt().toString())
+                .build();
+
     }
 }
