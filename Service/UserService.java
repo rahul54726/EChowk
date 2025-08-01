@@ -6,6 +6,7 @@ import com.EChowk.EChowk.Repository.SkillOfferRepo;
 import com.EChowk.EChowk.Repository.SkillRepo;
 import com.EChowk.EChowk.Repository.UserRepo;
 import com.EChowk.EChowk.dto.DashboardStatsDto;
+import com.EChowk.EChowk.enums.Role;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -47,6 +48,7 @@ public class UserService {
             throw new RuntimeException("Email Already Exists.");
         }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setRole(Role.USER);
         emailService.sendWelcomeEmail(user.getEmail(),user.getName());
         return userRepo.save(user);
     }
@@ -99,5 +101,17 @@ public class UserService {
 
         userRepo.save(demoUser);
     }
-
+    public void seedAdminUser(){
+        String adminEmail = "admin@skillhub.com";
+        if(userRepo.findByEmail(adminEmail).isPresent()) return;
+        User admin = User.builder()
+                .name("Admin")
+                .email(adminEmail)
+                .password(passwordEncoder.encode("admin123"))
+                .bio("I am Administrator")
+                .location("Headquarters")
+                .role(Role.ADMIN)
+                .build();
+        userRepo.save(admin);
+    }
 }

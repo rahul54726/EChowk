@@ -1,5 +1,6 @@
 package com.EChowk.EChowk.Entity;
 
+import com.EChowk.EChowk.enums.Role;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -33,7 +34,7 @@ public class User implements UserDetails {
     private Double averageRating = 0.0;
     @DBRef
     private List<Skill> skills;
-
+    private Role role;
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Collections.singleton(new SimpleGrantedAuthority("ROLE_USER"));

@@ -68,6 +68,34 @@ public class SecurityConfiguration {
 //                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
 //                .build();
 //    }
+//@Bean
+//public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+//    return http
+//            .csrf(AbstractHttpConfigurer::disable)
+//            .cors(cors -> cors.configurationSource(request -> {
+//                CorsConfiguration config = new CorsConfiguration();
+//                config.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:5173"));
+//                config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+//                config.setAllowedHeaders(List.of("*"));
+//                config.setAllowCredentials(true);
+//                return config;
+//            }))
+//            .authorizeHttpRequests(auth -> auth
+//                    .requestMatchers(
+//                            "/auth/**",
+//                            "/users/register",
+//                            "/health",
+//                            "/skills/**",
+//                            "/skilloffers/**",
+//                            "/requests/**"
+//                    ).permitAll()
+//                    .anyRequest().authenticated()
+//            )
+//            .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+//            .authenticationProvider(authenticationProvider())
+//            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+//            .build();
+//}
 @Bean
 public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     return http
@@ -82,13 +110,19 @@ public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Excepti
             }))
             .authorizeHttpRequests(auth -> auth
                     .requestMatchers(
-                            "/auth/**",
+                            "/auth/",
                             "/users/register",
-                            "/health",
-                            "/skills/**",
-                            "/skilloffers/**",
-                            "/requests/**"
+                            "/health"
                     ).permitAll()
+
+                    // User-specific accessible endpoints
+                    .requestMatchers("/skills/", "/skilloffers/", "/requests/", "/reviews/")
+                    .hasRole("USER")
+
+                    // Admin endpoints (if any)
+                    .requestMatchers("/admin/").hasRole("ADMIN")
+
+                    // All other endpoints require authentication
                     .anyRequest().authenticated()
             )
             .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -96,7 +130,6 @@ public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Excepti
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
             .build();
 }
-
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
