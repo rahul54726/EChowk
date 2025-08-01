@@ -2,6 +2,7 @@ package com.EChowk.EChowk.Controller;
 
 import com.EChowk.EChowk.Entity.SkillOffer;
 import com.EChowk.EChowk.Service.SkillOfferService;
+import com.EChowk.EChowk.dto.SkillOfferCreationDto;
 import com.EChowk.EChowk.dto.SkillOfferDto;
 import com.EChowk.EChowk.utils.DtoMapper;
 import lombok.RequiredArgsConstructor;
@@ -21,10 +22,11 @@ public class SkillOfferController {
     private final SkillOfferService skillOfferService;
 
     @PostMapping
-    public ResponseEntity<?> createOffer(@RequestBody SkillOfferDto offerDto) {
-        SkillOffer saved = skillOfferService.createOffer(DtoMapper.toSkillOffer(offerDto));
-        return new ResponseEntity<>(DtoMapper.toSkillOfferDto(saved), HttpStatus.OK);
+    public ResponseEntity<?> createOffer(@RequestBody SkillOfferCreationDto dto) {
+        SkillOffer saved = skillOfferService.createOffer(dto);
+        return new ResponseEntity<>(DtoMapper.toSkillOfferDto(saved), HttpStatus.CREATED);
     }
+
     @GetMapping("/user/{userId}")
     public ResponseEntity<?> getOffersByUser(@PathVariable String userId){
         return new ResponseEntity<>(skillOfferService.getOfferByUserId(userId).stream()

@@ -6,7 +6,9 @@ import com.EChowk.EChowk.Entity.User;
 import com.EChowk.EChowk.Repository.SkillOfferRepo;
 import com.EChowk.EChowk.Repository.SkillRepo;
 import com.EChowk.EChowk.Repository.UserRepo;
+import com.EChowk.EChowk.dto.SkillOfferCreationDto;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -14,6 +16,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class SkillOfferService {
 
     private final SkillOfferRepo skillOfferRepo;
@@ -21,24 +24,29 @@ public class SkillOfferService {
     private final SkillRepo skillRepo;
 
     // ✅ Create Offer
-    public SkillOffer createOffer(SkillOffer offer) {
-        // Fetch referenced Skill and User
-        User user = userRepo.findById(offer.getUser().getId())
+    public SkillOffer createOffer(SkillOfferCreationDto dto) {
+        User user = userRepo.findById(dto.getUserId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        Skill skill = skillRepo.findById(offer.getSkill().getId())
+
+        Skill skill = skillRepo.findById(dto.getSkillId())
                 .orElseThrow(() -> new RuntimeException("Skill not found"));
 
-        offer.setUser(user);
-        offer.setSkill(skill);
-        offer.setAvailability(true);
-        offer.setCreatedAt(LocalDateTime.now());
-
-        if (offer.getMaxStudents() == 0) offer.setMaxStudents(1);
-        offer.setCurrentStudents(0);
-        offer.setStatus("ACTIVE");
+        SkillOffer offer = SkillOffer.builder()
+                .user(user)
+                .skill(skill)
+                .title(dto.getTitle())
+                .description(dto.getDescription())
+                .availability(dto.isAvailable())
+                .status("ACTIVE")
+                .currentStudents(0)
+                .maxStudents(1)
+                .createdAt(LocalDateTime.now())
+                .build();
 
         return skillOfferRepo.save(offer);
     }
+
+
 
     // ✅ Get all offers
     public List<SkillOffer> getAllOffers() {

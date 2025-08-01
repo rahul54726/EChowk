@@ -8,6 +8,7 @@ import com.EChowk.EChowk.Repository.UserRepo;
 import com.EChowk.EChowk.dto.DashboardStatsDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -37,7 +38,8 @@ public class UserService {
         this.skillOfferRepo = skillOfferRepo;
         this.requestRepo = requestRepo;
     }
-
+    @Autowired
+    private EmailService emailService;
     public User registerUser(User user) {
         Optional<User> existing = userRepo.findByEmail(user.getEmail());
         if (existing.isPresent()) {
@@ -45,6 +47,7 @@ public class UserService {
             throw new RuntimeException("Email Already Exists.");
         }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        emailService.sendWelcomeEmail(user.getEmail(),user.getName());
         return userRepo.save(user);
     }
 
@@ -79,4 +82,22 @@ public class UserService {
                 .averageRating(averageRating)
                 .build();
     }
+    public void seedDemoUser() {
+        String demoEmail = "demo@skillhub.com";
+        if (userRepo.findByEmail(demoEmail).isPresent()) {
+            return; // Already exists, no need to seed again
+        }
+
+        User demoUser = User.builder()
+                .name("Demo User")
+                .email(demoEmail)
+                .password(passwordEncoder.encode("demo123"))
+                .bio("I'm a demo user for testing!")
+                .location("Nowhere")
+                .averageRating(4.5)
+                .build();
+
+        userRepo.save(demoUser);
+    }
+
 }

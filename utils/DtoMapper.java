@@ -37,22 +37,26 @@ public class DtoMapper {
     }
 
     public static SkillOfferDto toSkillOfferDto(SkillOffer offer) {
+        User user = offer.getUser();
+        Skill skill = offer.getSkill();
+
         return SkillOfferDto.builder()
                 .id(offer.getId())
                 .title(offer.getTitle())
                 .description(offer.getDescription())
-                .skillId(offer.getSkill().getId())
-                .skillName(offer.getSkill().getName())
-                .userId(offer.getUser().getId())
-                .userName(offer.getUser().getName())
-                .userAvatar(null) // Placeholder for future avatar support
+                .skillId(skill != null ? skill.getId() : null)
+                .skillName(skill != null ? skill.getName() : "Unknown Skill")
+                .userId(user != null ? user.getId() : null)
+                .userName(user != null ? user.getName() : "Unknown User")
+                .userAvatar(null)
                 .availability(offer.getAvailability())
                 .maxStudents(offer.getMaxStudents())
                 .currentStudents(offer.getCurrentStudents())
                 .status(offer.getStatus())
-                .createdAt(offer.getCreatedAt().toString())
+                .createdAt(offer.getCreatedAt() != null ? offer.getCreatedAt().toString() : null)
                 .build();
     }
+
 
 
     public static SkillOffer toSkillOffer(SkillOfferDto dto) {

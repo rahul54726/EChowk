@@ -42,4 +42,8 @@ public class SkillOffer {
     public boolean isAvailability() {
         return this.availability;
     }
+
+    public void setAvailable(boolean b) {
+        availability = b;
+    }
 }
