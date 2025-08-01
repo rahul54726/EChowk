@@ -33,6 +33,6 @@ public class ReviewController {
         List<Review> reviews = reviewService.getReviewsForOffer(offerId);
         double avgRating = reviews.stream().mapToInt(Review::getRating).average().orElse(0.0);
         int totalReviews = reviews.size();
-        return  new ResponseEntity<>(Map.of("averageRating",avgRating,"totalReiews",totalReviews),HttpStatus.OK);
+        return  new ResponseEntity<>(Map.of("averageRating",avgRating,"totalReviews",totalReviews),HttpStatus.OK);
     }
 }
