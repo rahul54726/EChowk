@@ -6,6 +6,7 @@ import com.EChowk.EChowk.Repository.SkillOfferRepo;
 import com.EChowk.EChowk.Repository.SkillRepo;
 import com.EChowk.EChowk.Repository.UserRepo;
 import com.EChowk.EChowk.dto.DashboardStatsDto;
+import com.EChowk.EChowk.dto.UserUpdateRequest;
 import com.EChowk.EChowk.enums.Role;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -113,5 +114,12 @@ public class UserService {
                 .role(Role.ADMIN)
                 .build();
         userRepo.save(admin);
+    }
+    public User updateProfile(UserUpdateRequest dto, String userId) {
+        User user = userRepo.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        user.setName(dto.getName());
+        user.setBio(dto.getBio());
+        user.setLocation(dto.getLocation());
+        return userRepo.save(user);
     }
 }

@@ -1,8 +1,11 @@
 package com.EChowk.EChowk.Controller;
 
 import com.EChowk.EChowk.Entity.User;
+import com.EChowk.EChowk.Repository.UserRepo;
+import com.EChowk.EChowk.Service.JwtService;
 import com.EChowk.EChowk.Service.UserService;
 import com.EChowk.EChowk.dto.UserDto;
+import com.EChowk.EChowk.dto.UserUpdateRequest;
 import com.EChowk.EChowk.utils.DtoMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,18 +13,20 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Optional;
-
 @Slf4j
 @RestController
 @RequestMapping("/users")
 public class UserController {
 
     private final UserService userService;
+    private final UserRepo userRepo;
+    private final JwtService jwtService;
 
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(UserService userService, UserRepo userRepo, JwtService jwtService) {
         this.userService = userService;
+        this.userRepo = userRepo;
+        this.jwtService = jwtService;
     }
 
     @PostMapping("/register")
@@ -49,10 +54,20 @@ public class UserController {
         return new ResponseEntity<>(DtoMapper.toUserDto(user), HttpStatus.OK);
     }
 
-
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable String id) {
         userService.deleteUser(id);
         return new ResponseEntity<>("User deleted successfully", HttpStatus.OK);
+    }
+
+    @PutMapping("/update")
+    public ResponseEntity<?> updateProfile(@RequestBody UserUpdateRequest request, @RequestHeader("Authorization") String token) {
+        String jwt = token.substring(7);
+        String userEmail = jwtService.extractUsername(jwt);
+        User user = userRepo.findByEmail(userEmail)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        User updatedUser = userService.updateProfile(request, user.getId());
+        return new ResponseEntity<>(DtoMapper.toUserDto(updatedUser), HttpStatus.OK);
     }
 }
