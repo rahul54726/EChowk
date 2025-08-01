@@ -1,5 +1,6 @@
 package com.EChowk.EChowk.Service;
 
+import com.EChowk.EChowk.exception.ResourceNotFoundException;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +28,7 @@ public class EmailService {
                             "<br><p>Cheers,<br>SkillHub</p>", true);
             javaMailSender.send(message);
         } catch (MessagingException e) {
-            throw new RuntimeException("Failed to send Email", e);
+            throw new ResourceNotFoundException("Failed to send Email");
         }
     }
 
@@ -41,7 +42,7 @@ public class EmailService {
             helper.setText(body, true); // Supports HTML
             javaMailSender.send(message);
         } catch (MessagingException e) {
-            throw new RuntimeException("Failed to send Email", e);
+            throw new ResourceNotFoundException("Failed to send Email");
         }
     }
 }

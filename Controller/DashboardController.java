@@ -16,9 +16,8 @@ public class DashboardController {
 
     private final DashboardService dashboardService;
 
-    @GetMapping("/{userId}") // ✅ Add missing `/`
+    @GetMapping("/{userId}")
     public ResponseEntity<?> getStatus(@PathVariable String userId){
-        DashboardStatsDto stats = dashboardService.getUserStats(userId);
-        return new ResponseEntity<>(stats, HttpStatus.OK);
+        return new ResponseEntity<>(dashboardService.getUserStats(userId),HttpStatus.OK);
     }
 }

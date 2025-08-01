@@ -9,4 +9,5 @@ public interface SkillOfferRepo extends MongoRepository<SkillOffer, String> {
     List<SkillOffer> findByUserId(String userId);
     List<SkillOffer> findByAvailability(boolean availability);
     List<SkillOffer> findByUserIdAndAvailability(String userId, boolean availability);
+    long countByUser_Id(String userId);
 }

@@ -35,9 +35,8 @@ public class SkillOfferController {
     }
     @GetMapping
     public ResponseEntity<?> getAllSkillOffers() {
-        return new ResponseEntity<>(skillOfferService.getAllOffers().stream()
-                .map(DtoMapper::toSkillOfferDto)
-                .collect(Collectors.toList()),HttpStatus.OK);
+        List<SkillOfferDto> offers = skillOfferService.getAllOffers();
+        return new ResponseEntity<>(offers,HttpStatus.OK);
     }
     @GetMapping("/available")
     public ResponseEntity<?> getAvailableOffers(){

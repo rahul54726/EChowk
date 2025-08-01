@@ -8,6 +8,7 @@ import com.EChowk.EChowk.Repository.ReviewRepo;
 import com.EChowk.EChowk.Repository.SkillOfferRepo;
 import com.EChowk.EChowk.Repository.UserRepo;
 import com.EChowk.EChowk.dto.ReviewDto;
+import com.EChowk.EChowk.exception.ResourceNotFoundException;
 import com.EChowk.EChowk.utils.DtoMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,8 +23,8 @@ public class ReviewService {
     private final UserRepo userRepo;
     private final SkillOfferRepo skillOfferRepo;
     public Review createReview(ReviewDto dto){
-        User reviewer = userRepo.findById(dto.getReviewerId()).orElseThrow(() -> new RuntimeException("Reviewer Not Found"));
-        SkillOffer offer = skillOfferRepo.findById(dto.getSkillOfferId()).orElseThrow(()->new RuntimeException("Skill offer not Found"));
+        User reviewer = userRepo.findById(dto.getReviewerId()).orElseThrow(() -> new ResourceNotFoundException("Reviewer Not Found"));
+        SkillOffer offer = skillOfferRepo.findById(dto.getSkillOfferId()).orElseThrow(()->new ResourceNotFoundException("Skill offer not Found"));
         Review review = Review.builder()
                 .reviewer(reviewer)
                 .skillOffer(offer)

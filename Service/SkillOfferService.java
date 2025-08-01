@@ -7,12 +7,20 @@ import com.EChowk.EChowk.Repository.SkillOfferRepo;
 import com.EChowk.EChowk.Repository.SkillRepo;
 import com.EChowk.EChowk.Repository.UserRepo;
 import com.EChowk.EChowk.dto.SkillOfferCreationDto;
+import com.EChowk.EChowk.dto.SkillOfferDto;
+import com.EChowk.EChowk.exception.ResourceNotFoundException;
+import com.EChowk.EChowk.utils.DtoMapper;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -23,13 +31,14 @@ public class SkillOfferService {
     private final UserRepo userRepo;
     private final SkillRepo skillRepo;
 
-    // ✅ Create Offer
+    // ✅ Create a new Skill Offer and evict cached offers
+    @CacheEvict(value = "skillOffers", allEntries = true)
     public SkillOffer createOffer(SkillOfferCreationDto dto) {
         User user = userRepo.findById(dto.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         Skill skill = skillRepo.findById(dto.getSkillId())
-                .orElseThrow(() -> new RuntimeException("Skill not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Skill not found"));
 
         SkillOffer offer = SkillOffer.builder()
                 .user(user)
@@ -46,11 +55,12 @@ public class SkillOfferService {
         return skillOfferRepo.save(offer);
     }
 
-
-
-    // ✅ Get all offers
-    public List<SkillOffer> getAllOffers() {
-        return skillOfferRepo.findAll();
+    // ✅ Fetch all offers and cache the result
+    @Cacheable(value = "skillOffers")
+    public List<SkillOfferDto> getAllOffers() {
+        log.info("Fetching skill offers from database...");
+        List<SkillOffer> offers = skillOfferRepo.findAll();
+        return offers.stream().map(DtoMapper::toSkillOfferDto).collect(Collectors.toList());
     }
 
     // ✅ Get offers by user
@@ -58,12 +68,12 @@ public class SkillOfferService {
         return skillOfferRepo.findByUserId(userId);
     }
 
-    // ✅ Get available offers
+    // ✅ Get only available offers
     public List<SkillOffer> getAvailableOffers() {
         return skillOfferRepo.findByAvailability(true);
     }
 
-    // ✅ Get available offers for a specific user
+    // ✅ Get available offers created by a specific user
     public List<SkillOffer> getAvailableOffersByUser(String userId) {
         return skillOfferRepo.findByUserIdAndAvailability(userId, true);
     }

@@ -8,4 +8,5 @@ import java.util.List;
 public interface RequestRepo extends MongoRepository<Request, String> {
     List<Request> findByRequester_Id(String requesterId);
     List<Request> findBySkillOffer_Id(String skillOfferId);
+    long countByRequester_Id(String userId);
 }

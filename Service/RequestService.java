@@ -7,6 +7,7 @@ import com.EChowk.EChowk.Repository.RequestRepo;
 import com.EChowk.EChowk.Repository.SkillOfferRepo;
 import com.EChowk.EChowk.Repository.UserRepo;
 import com.EChowk.EChowk.dto.RequestCreationDto;
+import com.EChowk.EChowk.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -67,7 +68,7 @@ public class RequestService {
     // ✅ Update the status of a request (ACCEPTED / REJECTED)
     public void updateRequestStatus(String requestId, String status) {
         Request request = requestRepo.findById(requestId)
-                .orElseThrow(() -> new RuntimeException("Request not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Request not found"));
 
         request.setStatus(status.toUpperCase());
         requestRepo.save(request);
