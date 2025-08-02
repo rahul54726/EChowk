@@ -45,4 +45,19 @@ public class EmailService {
             throw new ResourceNotFoundException("Failed to send Email");
         }
     }
+    public void sendPasswordResetEmail(String toEmail, String resetLink) {
+        try {
+            MimeMessage message = javaMailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+            helper.setFrom("vermarahul11034@gmail.com");
+            helper.setTo(toEmail);
+            helper.setSubject("Reset Your Password - EChowk");
+            helper.setText("<p>Click the link below to reset your password:</p>" +
+                    "<a href=\"" + resetLink + "\">Reset Password</a>", true);
+            javaMailSender.send(message);
+        } catch (MessagingException e) {
+            throw new RuntimeException("Failed to send Password Reset Email", e);
+        }
+    }
+
 }

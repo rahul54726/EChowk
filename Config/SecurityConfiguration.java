@@ -109,20 +109,21 @@ public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Excepti
                 return config;
             }))
             .authorizeHttpRequests(auth -> auth
+                    // Publicly accessible endpoints
                     .requestMatchers(
-                            "/auth/",
+                            "/auth/**",
                             "/users/register",
                             "/health"
                     ).permitAll()
 
-                    // User-specific accessible endpoints
-                    .requestMatchers("/skills/", "/skilloffers/", "/requests/", "/reviews/")
-                    .hasRole("USER")
+                    // Endpoints accessible to USER role
+                    .requestMatchers("/skills/**", "/skilloffers/**", "/requests/**", "/reviews/**")
+                    .hasAuthority("ROLE_USER")
 
-                    // Admin endpoints (if any)
-                    .requestMatchers("/admin/").hasRole("ADMIN")
+                    // Admin-specific endpoints (adjust as needed)
+                    .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
 
-                    // All other endpoints require authentication
+                    // All other endpoints need authentication
                     .anyRequest().authenticated()
             )
             .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -130,6 +131,7 @@ public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Excepti
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
             .build();
 }
+
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
