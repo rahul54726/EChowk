@@ -117,7 +117,7 @@ public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Excepti
                     ).permitAll()
 
                     // Endpoints accessible to USER role
-                    .requestMatchers("/skills/**", "/skilloffers/**", "/requests/**", "/reviews/**")
+                    .requestMatchers("/skills/**", "/offers/**", "/requests/**", "/reviews/**")
                     .hasAuthority("ROLE_USER")
 
                     // Admin-specific endpoints (adjust as needed)
