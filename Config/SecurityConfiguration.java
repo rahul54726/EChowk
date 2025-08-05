@@ -113,7 +113,9 @@ public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Excepti
                     .requestMatchers(
                             "/auth/**",
                             "/users/register",
-                            "/health"
+                            "/health",
+                            "swagger-ui/**",
+                            "/v3/api-docs/**"
                     ).permitAll()
 
                     // Endpoints accessible to USER role

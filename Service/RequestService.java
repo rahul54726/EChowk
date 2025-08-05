@@ -9,6 +9,7 @@ import com.EChowk.EChowk.Repository.UserRepo;
 import com.EChowk.EChowk.dto.RequestCreationDto;
 import com.EChowk.EChowk.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,24 +22,22 @@ public class RequestService {
     private final SkillOfferRepo skillOfferRepo;
     private final UserRepo userRepo;
     private final EmailService emailService;
+
     // ✅ Create a new request
     public Request createRequest(RequestCreationDto dto) {
-        // 1. Get the skill offer by ID
         SkillOffer offer = skillOfferRepo.findById(dto.getSkillOfferId())
                 .orElseThrow(() -> new RuntimeException("Skill Offer not found"));
 
-        // 2. Get the user who is requesting
         User requester = userRepo.findById(dto.getRequesterId())
                 .orElseThrow(() -> new RuntimeException("Requester not found"));
 
-        // 3. Save the request
         Request request = new Request();
         request.setSkillOffer(offer);
         request.setRequester(requester);
         request.setStatus("PENDING");
         Request saved = requestRepo.save(request);
 
-        // 4. Send notification to the tutor via email
+        // Notify tutor
         User tutor = offer.getUser();
         if (tutor != null && tutor.getEmail() != null) {
             String subject = "New Skill Request Received!";
@@ -53,19 +52,15 @@ public class RequestService {
         return saved;
     }
 
-
-
-    // ✅ Get all requests made by a specific user
     public List<Request> getRequestsByUser(String userId) {
-        return requestRepo.findByRequester_Id(userId);  // This must match the method name in your repo
+        return requestRepo.findByRequester_Id(userId);
     }
 
-    // ✅ Get all requests for a specific skill offer (for offer owner)
     public List<Request> getRequestsByOffer(String offerId) {
         return requestRepo.findBySkillOffer_Id(offerId);
     }
 
-    // ✅ Update the status of a request (ACCEPTED / REJECTED)
+    @CacheEvict(value = "skillOffers", allEntries = true)
     public void updateRequestStatus(String requestId, String status) {
         Request request = requestRepo.findById(requestId)
                 .orElseThrow(() -> new ResourceNotFoundException("Request not found"));
@@ -73,9 +68,18 @@ public class RequestService {
         request.setStatus(status.toUpperCase());
         requestRepo.save(request);
 
-        // ✉️ Notify requester
-        User requester = request.getRequester();
         SkillOffer offer = request.getSkillOffer();
+
+        if (status.equalsIgnoreCase("ACCEPTED")) {
+            offer.setCurrentStudents(offer.getCurrentStudents() + 1);
+
+            if (offer.getCurrentStudents() >= offer.getMaxStudents()) {
+                offer.setAvailability(false);
+            }
+            skillOfferRepo.save(offer);
+        }
+
+        User requester = request.getRequester();
         String tutorName = offer.getUser().getName();
         String subject = "Your Request has been " + status.toUpperCase();
         String message = String.format(
@@ -87,6 +91,4 @@ public class RequestService {
         );
         emailService.sendEmail(requester.getEmail(), subject, message);
     }
-
-
 }
