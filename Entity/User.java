@@ -35,6 +35,7 @@ public class User implements UserDetails {
     @DBRef
     private List<Skill> skills;
     private Role role;
+    private String profilePictureUrl;
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Collections.singleton(new SimpleGrantedAuthority("ROLE_USER"));

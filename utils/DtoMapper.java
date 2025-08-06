@@ -17,6 +17,7 @@ public class DtoMapper {
                 .bio(user.getBio())
                 .location(user.getLocation())
                 .averageRating(user.getAverageRating())
+                .profilePictureUrl(user.getProfilePictureUrl())
                 .build();
     }
 

@@ -111,19 +111,24 @@ public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Excepti
             .authorizeHttpRequests(auth -> auth
                     // Publicly accessible endpoints
                     .requestMatchers(
-                            "/auth/**",
+                            "/auth/",
                             "/users/register",
                             "/health",
-                            "swagger-ui/**",
-                            "/v3/api-docs/**"
+                            "/swagger-ui/",
+                            "/v3/api-docs/"
                     ).permitAll()
 
                     // Endpoints accessible to USER role
-                    .requestMatchers("/skills/**", "/offers/**", "/requests/**", "/reviews/**")
-                    .hasAuthority("ROLE_USER")
+                    .requestMatchers(
+                            "/skills/",
+                            "/offers/",
+                            "/requests/",
+                            "/reviews/",
+                            "/users/upload-profile-picture"
+                    ).hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")  // ✅ Allow USER & ADMIN
 
-                    // Admin-specific endpoints (adjust as needed)
-                    .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
+                    // Admin-specific endpoints
+                    .requestMatchers("/admin/").hasAuthority("ROLE_ADMIN")
 
                     // All other endpoints need authentication
                     .anyRequest().authenticated()

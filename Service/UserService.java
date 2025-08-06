@@ -6,10 +6,12 @@ import com.EChowk.EChowk.Repository.*;
 import com.EChowk.EChowk.dto.DashboardStatsDto;
 import com.EChowk.EChowk.dto.UserUpdateRequest;
 import com.EChowk.EChowk.enums.Role;
+import com.EChowk.EChowk.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -27,7 +29,7 @@ public class UserService {
     private final RequestRepo requestRepo;
     private final PasswordResetTokenRepo passwordResetTokenRepo;
     private final EmailService emailService;
-
+    private final CloudinaryUploadService cloudinaryUploadService;
     public User registerUser(User user) {
         Optional<User> existing = userRepo.findByEmail(user.getEmail());
         if (existing.isPresent()) {
@@ -147,5 +149,11 @@ public class UserService {
         userRepo.save(user);
 
         passwordResetTokenRepo.delete(resetToken);
+    }
+    public User uploadProfilePicture(String userId, MultipartFile file){
+        User user = userRepo.findById(userId).orElseThrow(()-> new ResourceNotFoundException("Resource Not Found"));
+        String imageUrl = cloudinaryUploadService.uploadProfilePicture(file,userId);
+        user.setProfilePictureUrl(imageUrl);
+        return userRepo.save(user);
     }
 }

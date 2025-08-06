@@ -7,27 +7,22 @@ import com.EChowk.EChowk.Service.UserService;
 import com.EChowk.EChowk.dto.UserDto;
 import com.EChowk.EChowk.dto.UserUpdateRequest;
 import com.EChowk.EChowk.utils.DtoMapper;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @RestController
 @RequestMapping("/users")
+@RequiredArgsConstructor
 public class UserController {
 
     private final UserService userService;
     private final UserRepo userRepo;
     private final JwtService jwtService;
-
-    @Autowired
-    public UserController(UserService userService, UserRepo userRepo, JwtService jwtService) {
-        this.userService = userService;
-        this.userRepo = userRepo;
-        this.jwtService = jwtService;
-    }
 
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody User user) {
@@ -41,33 +36,42 @@ public class UserController {
     }
 
     @GetMapping("/by-id/{id}")
-    public ResponseEntity<?> getUserById(@PathVariable String id) {
+    public ResponseEntity<UserDto> getUserById(@PathVariable String id) {
         User user = userService.getUserById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        return new ResponseEntity<>(DtoMapper.toUserDto(user), HttpStatus.OK);
+        return ResponseEntity.ok(DtoMapper.toUserDto(user));
     }
 
     @GetMapping("/by-email/{email}")
     public ResponseEntity<UserDto> getUserByEmail(@PathVariable String email) {
         User user = userService.getUserByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        return new ResponseEntity<>(DtoMapper.toUserDto(user), HttpStatus.OK);
+        return ResponseEntity.ok(DtoMapper.toUserDto(user));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteUser(@PathVariable String id) {
+    public ResponseEntity<String> deleteUser(@PathVariable String id) {
         userService.deleteUser(id);
-        return new ResponseEntity<>("User deleted successfully", HttpStatus.OK);
+        return ResponseEntity.ok("User deleted successfully");
     }
 
     @PutMapping("/update")
-    public ResponseEntity<?> updateProfile(@RequestBody UserUpdateRequest request, @RequestHeader("Authorization") String token) {
+    public ResponseEntity<UserDto> updateProfile(@RequestBody UserUpdateRequest request, @RequestHeader("Authorization") String token) {
         String jwt = token.substring(7);
         String userEmail = jwtService.extractUsername(jwt);
         User user = userRepo.findByEmail(userEmail)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         User updatedUser = userService.updateProfile(request, user.getId());
-        return new ResponseEntity<>(DtoMapper.toUserDto(updatedUser), HttpStatus.OK);
+        return ResponseEntity.ok(DtoMapper.toUserDto(updatedUser));
+    }
+
+    @PostMapping("/upload-profile-picture")
+    public ResponseEntity<UserDto> uploadProfilePicture(@RequestHeader("Authorization") String token,
+                                                        @RequestParam("file") MultipartFile file) {
+        String jwt = token.substring(7);
+        String userId = jwtService.extractUserId(jwt);
+        User updatedUser = userService.uploadProfilePicture(userId, file);
+        return ResponseEntity.ok(DtoMapper.toUserDto(updatedUser));
     }
 }

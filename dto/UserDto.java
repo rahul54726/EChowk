@@ -16,5 +16,6 @@ public class UserDto {
     private String location;
     private String bio;
     private double averageRating;
+    private String profilePictureUrl;
 
 }
