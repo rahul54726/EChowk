@@ -37,8 +37,11 @@ public class SkillOfferService {
     private final UserRepo userRepo;
     private final SkillRepo skillRepo;
     private final ReviewRepo reviewRepo;
-    // ✅ Create a new Skill Offer and evict cached offers
-    @CacheEvict(value = "skillOffers", allEntries = true)
+
+    /**
+     * Creates a new SkillOffer and evicts cached offers
+     */
+    @CacheEvict(value = {"skillOffers", "userSkillOffers"}, allEntries = true)
     public SkillOffer createOffer(SkillOfferCreationDto dto) {
         User user = userRepo.findById(dto.getUserId())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
@@ -61,38 +64,57 @@ public class SkillOfferService {
         return skillOfferRepo.save(offer);
     }
 
-    // ✅ Fetch all offers and cache the result
+    /**
+     * Retrieves all skill offers (cached)
+     */
     @Cacheable(value = "skillOffers")
     public List<SkillOfferDto> getAllOffers() {
-        log.info("Fetching skill offers from database...");
+        log.info("Fetching all skill offers from DB...");
         List<SkillOffer> offers = skillOfferRepo.findAll();
         return offers.stream().map(DtoMapper::toSkillOfferDto).collect(Collectors.toList());
     }
 
-    // ✅ Get offers by user
+    /**
+     * Get skill offers by a specific user
+     */
+    @Cacheable(value = "userSkillOffers", key = "#userId")
     public List<SkillOffer> getOfferByUserId(String userId) {
         return skillOfferRepo.findByUserId(userId);
     }
 
-    // ✅ Get only available offers
+    /**
+     * Get all available skill offers
+     */
     public List<SkillOffer> getAvailableOffers() {
         return skillOfferRepo.findByAvailability(true);
     }
 
-    // ✅ Get available offers created by a specific user
+    /**
+     * Get available skill offers by a specific user
+     */
     public List<SkillOffer> getAvailableOffersByUser(String userId) {
         return skillOfferRepo.findByUserIdAndAvailability(userId, true);
     }
+
+    /**
+     * Delete a skill offer and related reviews. Clears cache.
+     */
     @Transactional
-    public void deleteSkillOffer(String offerId,String userId){
+    @CacheEvict(value = {"skillOffers", "userSkillOffers"}, allEntries = true)
+    public void deleteSkillOffer(String offerId, String userId) {
         reviewRepo.deleteBySkillOfferId(offerId);
         skillOfferRepo.deleteById(offerId);
     }
+
+    /**
+     * Paginated and filtered skill offer list
+     */
     public Page<SkillOfferDto> getFilteredOffers(int page, int size,
                                                  String skillName,
-                                                 String status , Boolean available){
-        Pageable pageable = PageRequest.of(page,size, Sort.by("createdAt").descending());
-        Page<SkillOffer> offers = skillOfferRepo.findFilteredOffers(skillName,status,available,pageable);
+                                                 String status,
+                                                 Boolean available) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        Page<SkillOffer> offers = skillOfferRepo.findFilteredOffers(skillName, status, available, pageable);
         return offers.map(DtoMapper::toSkillOfferDto);
     }
 }

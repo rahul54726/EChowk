@@ -1,58 +1,52 @@
 package com.EChowk.EChowk.Config;
 
+import com.EChowk.EChowk.Service.CustomUserDetailsService;
 import com.EChowk.EChowk.Service.FirebaseTokenVerifier;
+import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseToken;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
+
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
-import org.springframework.stereotype.Component;
-import org.springframework.web.filter.OncePerRequestFilter;
-
 import java.io.IOException;
-import java.util.Collections;
 
 @Component
 @RequiredArgsConstructor
 public class FirebaseAuthFilter extends OncePerRequestFilter {
 
     private final FirebaseTokenVerifier tokenVerifier;
-
-    @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) {
-        // ✅ Skip Firebase filter unless URL starts with /firebase
-        String path = request.getRequestURI();
-        return !path.startsWith("/firebase");
-    }
+    private final CustomUserDetailsService userDetailsService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
         String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String idToken = authHeader.substring(7);
-            try {
-                FirebaseToken decodedToken = tokenVerifier.verifyIdToken(idToken);
+        String token = authHeader.substring(7);
+        try {
+            FirebaseToken decodedToken = tokenVerifier.verifyToken(token);
+            String email = decodedToken.getEmail();
 
-                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                        decodedToken.getUid(),
-                        null,
-                        Collections.emptyList()
-                );
+            UserDetails userDetails = userDetailsService.loadUserByUsername(email); // Assumes user exists
 
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                    userDetails, null, userDetails.getAuthorities());
 
-            } catch (Exception e) {
-                // Optional: Log the exception
-                System.out.println("Firebase token verification failed: " + e.getMessage());
-            }
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+        } catch (FirebaseAuthException ex) {
+            // Token is invalid; ignore or log
         }
 
         filterChain.doFilter(request, response);
