@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -24,12 +25,14 @@ public class UserService {
 
     private final UserRepo userRepo;
     private final SkillRepo skillRepo;
-    private final PasswordEncoder passwordEncoder;
     private final SkillOfferRepo skillOfferRepo;
     private final RequestRepo requestRepo;
+    private final ReviewRepo reviewRepo;
     private final PasswordResetTokenRepo passwordResetTokenRepo;
     private final EmailService emailService;
     private final CloudinaryUploadService cloudinaryUploadService;
+    private final PasswordEncoder passwordEncoder;
+
     public User registerUser(User user) {
         Optional<User> existing = userRepo.findByEmail(user.getEmail());
         if (existing.isPresent()) {
@@ -38,8 +41,9 @@ public class UserService {
         }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setRole(Role.USER);
+        User saved = userRepo.save(user);
         emailService.sendWelcomeEmail(user.getEmail(), user.getName());
-        return userRepo.save(user);
+        return saved;
     }
 
     public Optional<User> getUserById(String id) {
@@ -54,7 +58,11 @@ public class UserService {
         return userRepo.save(user);
     }
 
+    @Transactional
     public void deleteUser(String id) {
+        skillOfferRepo.deleteByUserId(id);
+        requestRepo.deleteByRequesterId(id);
+        reviewRepo.deleteByReviewerId(id);
         userRepo.deleteById(id);
     }
 
@@ -108,7 +116,8 @@ public class UserService {
     }
 
     public User updateProfile(UserUpdateRequest dto, String userId) {
-        User user = userRepo.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepo.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         user.setName(dto.getName());
         user.setBio(dto.getBio());
         user.setLocation(dto.getLocation());
@@ -117,7 +126,7 @@ public class UserService {
 
     public void initiatePasswordReset(String email) {
         User user = userRepo.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         String token = UUID.randomUUID().toString();
         LocalDateTime expiry = LocalDateTime.now().plusMinutes(30);
@@ -134,25 +143,28 @@ public class UserService {
         emailService.sendPasswordResetEmail(email, resetLink);
     }
 
+    @Transactional
     public void resetPassword(String token, String newPassword) {
         PasswordResetToken resetToken = passwordResetTokenRepo.findByToken(token)
-                .orElseThrow(() -> new RuntimeException("Invalid or Expired Token"));
+                .orElseThrow(() -> new ResourceNotFoundException("Invalid or expired token"));
 
         if (resetToken.getExpiryDate().isBefore(LocalDateTime.now())) {
             throw new RuntimeException("Token expired");
         }
 
         User user = userRepo.findByEmail(resetToken.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepo.save(user);
 
         passwordResetTokenRepo.delete(resetToken);
     }
-    public User uploadProfilePicture(String userId, MultipartFile file){
-        User user = userRepo.findById(userId).orElseThrow(()-> new ResourceNotFoundException("Resource Not Found"));
-        String imageUrl = cloudinaryUploadService.uploadProfilePicture(file,userId);
+
+    public User uploadProfilePicture(String userId, MultipartFile file) {
+        User user = userRepo.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        String imageUrl = cloudinaryUploadService.uploadProfilePicture(file, userId);
         user.setProfilePictureUrl(imageUrl);
         return userRepo.save(user);
     }

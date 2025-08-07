@@ -16,27 +16,45 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.Collections;
 
-//@Component
+@Component
 @RequiredArgsConstructor
 public class FirebaseAuthFilter extends OncePerRequestFilter {
+
     private final FirebaseTokenVerifier tokenVerifier;
+
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        // ✅ Skip Firebase filter unless URL starts with /firebase
+        String path = request.getRequestURI();
+        return !path.startsWith("/firebase");
+    }
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain) throws ServletException, IOException {
         String authHeader = request.getHeader("Authorization");
-        if(authHeader != null && authHeader.startsWith("Bearer ")){
+
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String idToken = authHeader.substring(7);
             try {
                 FirebaseToken decodedToken = tokenVerifier.verifyIdToken(idToken);
+
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                        decodedToken.getUid(),null, Collections.emptyList()
+                        decodedToken.getUid(),
+                        null,
+                        Collections.emptyList()
                 );
+
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
                 SecurityContextHolder.getContext().setAuthentication(authentication);
-            }catch (Exception e){
 
+            } catch (Exception e) {
+                // Optional: Log the exception
+                System.out.println("Firebase token verification failed: " + e.getMessage());
             }
         }
-        filterChain.doFilter(request,response);
+
+        filterChain.doFilter(request, response);
     }
 }

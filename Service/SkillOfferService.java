@@ -3,6 +3,7 @@ package com.EChowk.EChowk.Service;
 import com.EChowk.EChowk.Entity.Skill;
 import com.EChowk.EChowk.Entity.SkillOffer;
 import com.EChowk.EChowk.Entity.User;
+import com.EChowk.EChowk.Repository.ReviewRepo;
 import com.EChowk.EChowk.Repository.SkillOfferRepo;
 import com.EChowk.EChowk.Repository.SkillRepo;
 import com.EChowk.EChowk.Repository.UserRepo;
@@ -16,7 +17,12 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -30,7 +36,7 @@ public class SkillOfferService {
     private final SkillOfferRepo skillOfferRepo;
     private final UserRepo userRepo;
     private final SkillRepo skillRepo;
-
+    private final ReviewRepo reviewRepo;
     // ✅ Create a new Skill Offer and evict cached offers
     @CacheEvict(value = "skillOffers", allEntries = true)
     public SkillOffer createOffer(SkillOfferCreationDto dto) {
@@ -76,5 +82,17 @@ public class SkillOfferService {
     // ✅ Get available offers created by a specific user
     public List<SkillOffer> getAvailableOffersByUser(String userId) {
         return skillOfferRepo.findByUserIdAndAvailability(userId, true);
+    }
+    @Transactional
+    public void deleteSkillOffer(String offerId,String userId){
+        reviewRepo.deleteBySkillOfferId(offerId);
+        skillOfferRepo.deleteById(offerId);
+    }
+    public Page<SkillOfferDto> getFilteredOffers(int page, int size,
+                                                 String skillName,
+                                                 String status , Boolean available){
+        Pageable pageable = PageRequest.of(page,size, Sort.by("createdAt").descending());
+        Page<SkillOffer> offers = skillOfferRepo.findFilteredOffers(skillName,status,available,pageable);
+        return offers.map(DtoMapper::toSkillOfferDto);
     }
 }

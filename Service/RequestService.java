@@ -11,6 +11,7 @@ import com.EChowk.EChowk.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -24,6 +25,7 @@ public class RequestService {
     private final EmailService emailService;
 
     // ✅ Create a new request
+    @Transactional
     public Request createRequest(RequestCreationDto dto) {
         SkillOffer offer = skillOfferRepo.findById(dto.getSkillOfferId())
                 .orElseThrow(() -> new RuntimeException("Skill Offer not found"));
@@ -59,7 +61,7 @@ public class RequestService {
     public List<Request> getRequestsByOffer(String offerId) {
         return requestRepo.findBySkillOffer_Id(offerId);
     }
-
+    @Transactional
     @CacheEvict(value = "skillOffers", allEntries = true)
     public void updateRequestStatus(String requestId, String status) {
         Request request = requestRepo.findById(requestId)

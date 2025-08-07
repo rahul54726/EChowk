@@ -12,6 +12,7 @@ import com.EChowk.EChowk.exception.ResourceNotFoundException;
 import com.EChowk.EChowk.utils.DtoMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -22,6 +23,7 @@ public class ReviewService {
     private final ReviewRepo reviewRepo;
     private final UserRepo userRepo;
     private final SkillOfferRepo skillOfferRepo;
+    @Transactional
     public Review createReview(ReviewDto dto){
         User reviewer = userRepo.findById(dto.getReviewerId()).orElseThrow(() -> new ResourceNotFoundException("Reviewer Not Found"));
         SkillOffer offer = skillOfferRepo.findById(dto.getSkillOfferId()).orElseThrow(()->new ResourceNotFoundException("Skill offer not Found"));

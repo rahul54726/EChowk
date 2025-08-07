@@ -6,7 +6,7 @@ import com.EChowk.EChowk.dto.SkillOfferCreationDto;
 import com.EChowk.EChowk.dto.SkillOfferDto;
 import com.EChowk.EChowk.utils.DtoMapper;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -33,11 +33,11 @@ public class SkillOfferController {
                 .map(DtoMapper::toSkillOfferDto)
                 .collect(Collectors.toList()),HttpStatus.OK);
     }
-    @GetMapping
-    public ResponseEntity<?> getAllSkillOffers() {
-        List<SkillOfferDto> offers = skillOfferService.getAllOffers();
-        return new ResponseEntity<>(offers,HttpStatus.OK);
-    }
+//    @GetMapping
+//    public ResponseEntity<?> getAllSkillOffers() {
+//        List<SkillOfferDto> offers = skillOfferService.getAllOffers();
+//        return new ResponseEntity<>(offers,HttpStatus.OK);
+//    }
     @GetMapping("/available")
     public ResponseEntity<?> getAvailableOffers(){
         return new ResponseEntity<>(skillOfferService.getAvailableOffers(),HttpStatus.OK);
@@ -45,5 +45,21 @@ public class SkillOfferController {
     @GetMapping("/users/{userId}/available")
     public ResponseEntity<?> getAvailableOfferByUser(@PathVariable String userId){
         return  new ResponseEntity<>(skillOfferService.getAvailableOffersByUser(userId),HttpStatus.OK);
+    }
+    @DeleteMapping("/{offerId}")
+    public ResponseEntity<?> deleteOffer(@PathVariable String offerId,@RequestParam String userId){
+        skillOfferService.deleteSkillOffer(offerId,userId);
+        return new ResponseEntity<>("Skill Offer Deletele",HttpStatus.OK);
+    }
+    @GetMapping
+    public ResponseEntity<Page<SkillOfferDto>> getAllOffers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String skillName,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) Boolean available
+    ) {
+        Page<SkillOfferDto> offers = skillOfferService.getFilteredOffers(page, size, skillName, status, available);
+        return ResponseEntity.ok(offers);
     }
 }
