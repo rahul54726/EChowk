@@ -15,6 +15,7 @@ public class Skill {
     private String id;
     private String name;
     private String type;
+    private String description;
     @DBRef
     private  User user;
 }

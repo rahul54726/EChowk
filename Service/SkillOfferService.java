@@ -17,16 +17,14 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -117,4 +115,24 @@ public class SkillOfferService {
         Page<SkillOffer> offers = skillOfferRepo.findFilteredOffers(skillName, status, available, pageable);
         return offers.map(DtoMapper::toSkillOfferDto);
     }
+    public Page<SkillOfferDto> searchSkillOffers(String keyword, Pageable pageable) {
+        String lowered = keyword.toLowerCase();
+
+        Page<SkillOffer> offers = skillOfferRepo.findAll(pageable);
+
+        List<SkillOfferDto> filtered = offers.getContent().stream()
+                .filter(offer ->
+                        (offer.getTitle() != null && offer.getTitle().toLowerCase().contains(lowered)) ||
+                                (offer.getDescription() != null && offer.getDescription().toLowerCase().contains(lowered)) ||
+                                (offer.getSkill() != null && offer.getSkill().getName() != null &&
+                                        offer.getSkill().getName().toLowerCase().contains(lowered))
+                )
+                .map(DtoMapper::toSkillOfferDto)
+                .toList();
+
+        return new PageImpl<>(filtered, pageable, offers.getTotalElements());
+    }
+
+
+
 }

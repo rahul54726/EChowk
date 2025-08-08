@@ -215,7 +215,7 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(auth -> auth
                         // Publicly accessible endpoints
                         .requestMatchers(
-                                "/auth/**",
+                                "/auth/login",
                                 "/users/register",
                                 "/health/**",
                                 "/swagger-ui/**",
@@ -228,7 +228,8 @@ public class SecurityConfiguration {
                                 "/offers/**",
                                 "/requests/**",
                                 "/reviews/**",
-                                "/users/upload-profile-picture"
+                                "/users/upload-profile-picture",
+                                "/search/**"
                         ).hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
 
                         // Admin-specific endpoints
