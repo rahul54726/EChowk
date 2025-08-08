@@ -1,6 +1,7 @@
 package com.EChowk.EChowk.Controller;
 
 import com.EChowk.EChowk.Entity.SkillOffer;
+import com.EChowk.EChowk.Service.JwtService;
 import com.EChowk.EChowk.Service.SkillOfferService;
 import com.EChowk.EChowk.dto.SkillOfferCreationDto;
 import com.EChowk.EChowk.dto.SkillOfferDto;
@@ -9,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,7 +22,7 @@ import java.util.stream.Collectors;
 public class SkillOfferController {
 
     private final SkillOfferService skillOfferService;
-
+    private JwtService jwtService;
     @PostMapping
     public ResponseEntity<?> createOffer(@RequestBody SkillOfferCreationDto dto) {
         SkillOffer saved = skillOfferService.createOffer(dto);
@@ -47,9 +49,22 @@ public class SkillOfferController {
         return  new ResponseEntity<>(skillOfferService.getAvailableOffersByUser(userId),HttpStatus.OK);
     }
     @DeleteMapping("/{offerId}")
-    public ResponseEntity<?> deleteOffer(@PathVariable String offerId,@RequestParam String userId){
-        skillOfferService.deleteSkillOffer(offerId,userId);
-        return new ResponseEntity<>("Skill Offer Deletele",HttpStatus.OK);
+    public ResponseEntity<?> deleteOffer(
+            @PathVariable String offerId,
+            @RequestParam String userId,
+            @RequestHeader("Authorization") String token) {
+
+        String jwt = token.substring(7);
+        String currentUserId = jwtService.extractUserId(jwt);
+        String currentUserRole = jwtService.extractUserRole(jwt);
+
+        // If not admin, ensure they can only delete their own offers
+        if (!currentUserRole.equals("ADMIN") && !currentUserId.equals(userId)) {
+            throw new AccessDeniedException("You can only delete your own skill offers.");
+        }
+
+        skillOfferService.deleteSkillOffer(offerId, userId);
+        return new ResponseEntity<>("Skill offer deleted", HttpStatus.OK);
     }
     @GetMapping
     public ResponseEntity<Page<SkillOfferDto>> getAllOffers(

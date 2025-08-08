@@ -55,7 +55,12 @@ public class UserService {
     }
 
     public User updateUser(User user) {
-        return userRepo.save(user);
+        User existing = userRepo.findById(user.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        existing.setName(user.getName());
+        existing.setBio(user.getBio());
+        existing.setLocation(user.getLocation());
+        return userRepo.save(existing);
     }
 
     @Transactional

@@ -16,7 +16,6 @@ import java.util.List;
 public class SkillService {
 
     private final SkillRepo skillRepo;
-
     public List<Skill> getAllSkills() {
         return skillRepo.findAll();
     }

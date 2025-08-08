@@ -11,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -50,10 +52,24 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteUser(@PathVariable String id) {
+    public ResponseEntity<String> deleteUser(
+            @PathVariable String id,
+            @RequestHeader("Authorization") String token) {
+
+        String jwt = token.substring(7);
+        String currentUserId = jwtService.extractUserId(jwt);
+        String currentUserRole = jwtService.extractUserRole(jwt); // You'll need this method in JwtService
+
+        // If not admin, ensure they can delete only themselves
+        if (!currentUserRole.equals("ADMIN") && !currentUserId.equals(id)) {
+            throw new AccessDeniedException("You can only delete your own account.");
+        }
+
         userService.deleteUser(id);
         return ResponseEntity.ok("User deleted successfully");
     }
+
+
 
     @PutMapping("/update")
     public ResponseEntity<UserDto> updateProfile(@RequestBody UserUpdateRequest request, @RequestHeader("Authorization") String token) {

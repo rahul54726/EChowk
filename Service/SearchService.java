@@ -9,6 +9,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -18,20 +19,45 @@ public class SearchService {
     private final SkillService skillService;
     private final SkillOfferService skillOfferService;
 
-    public SearchResultPageDto unifiedSearch(String keyword, int page, int size) {
-        PageRequest pageable = PageRequest.of(page, size);
+    public SearchResultPageDto unifiedSearch(String keyword, int page, int size, String sortField, String sortDir) {
+        // For simplicity, fetch enough results from each so sorting can be done together
+        PageRequest pageable = PageRequest.of(0, Integer.MAX_VALUE);
 
         Page<SkillDto> skills = skillService.searchSkills(keyword, pageable);
         Page<SkillOfferDto> offers = skillOfferService.searchSkillOffers(keyword, pageable);
 
-        // Combine both types of results into a single List<Object> or a common interface
         List<Object> combinedResults = new ArrayList<>();
         combinedResults.addAll(skills.getContent());
         combinedResults.addAll(offers.getContent());
 
-        long totalElements = skills.getTotalElements() + offers.getTotalElements();
+        // Manual sorting based on field name and direction
+        Comparator<Object> comparator = Comparator.comparing(obj -> {
+            try {
+                return (Comparable) obj.getClass().getMethod("get" + capitalize(sortField)).invoke(obj);
+            } catch (Exception e) {
+                return null; // If field not found, push nulls to end
+            }
+        }, Comparator.nullsLast(Comparator.naturalOrder()));
+
+        if ("desc".equalsIgnoreCase(sortDir)) {
+            comparator = comparator.reversed();
+        }
+
+        combinedResults.sort(comparator);
+
+        // Manual pagination after sorting
+        int start = page * size;
+        int end = Math.min(start + size, combinedResults.size());
+        List<Object> pagedList = start < end ? combinedResults.subList(start, end) : new ArrayList<>();
+
+        long totalElements = combinedResults.size();
         int totalPages = (int) Math.ceil((double) totalElements / size);
 
-        return new SearchResultPageDto(combinedResults, page, size, totalElements, totalPages);
+        return new SearchResultPageDto(pagedList, page, size, totalElements, totalPages);
+    }
+
+    private String capitalize(String str) {
+        if (str == null || str.isEmpty()) return str;
+        return str.substring(0, 1).toUpperCase() + str.substring(1);
     }
 }
