@@ -229,7 +229,8 @@ public class SecurityConfiguration {
                                 "/requests/**",
                                 "/reviews/**",
                                 "/users/upload-profile-picture",
-                                "/search/**"
+                                "/search/**",
+                                "/connections/**"
                         ).hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
 
                         // Admin-specific endpoints
