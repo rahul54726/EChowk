@@ -39,7 +39,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         final String authHeader = request.getHeader("Authorization");
         final String jwt;
-        final String userEmail;
+        final String userId;
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
@@ -56,10 +56,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             return;
         }
 
-        userEmail = jwtService.extractUsername(jwt);
+        // ✅ Extract userId directly from token claims
+        userId = jwtService.extractUserId(jwt);
 
-        if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            User user = userRepo.findByEmail(userEmail).orElse(null);
+        if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            User user = userRepo.findById(userId).orElse(null); // <-- Now fetching by ID
 
             if (user != null && jwtService.validateToken(jwt, user)) {
                 SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + user.getRole().name());
@@ -71,7 +72,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
 
-                System.out.println("Authenticated User: " + user.getEmail() + " | Role: " + authority.getAuthority());
+                System.out.println("Authenticated User: " + user.getId() + " | Role: " + authority.getAuthority());
             }
         }
 

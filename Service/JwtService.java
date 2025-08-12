@@ -21,14 +21,14 @@ public class JwtService {
     public String generateToken(User user) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("role", user.getRole().name());
-        claims.put("userId", user.getId());  // 👈 Adding userId to token claims
-        return createToken(claims, user.getEmail());
+        claims.put("userId", user.getId()); // ✅ Keep userId in claims
+        return createToken(claims, user.getEmail()); // Email still subject for compatibility
     }
 
     private String createToken(Map<String, Object> claims, String subject) {
         return Jwts.builder()
                 .setClaims(claims)
-                .setSubject(subject)
+                .setSubject(subject) // Email
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10)) // 10 hours
                 .signWith(getSignKey(), SignatureAlgorithm.HS256)
@@ -43,17 +43,16 @@ public class JwtService {
         return extractClaim(token, Claims::getSubject);
     }
 
-    public <T> T extractClaim(String token, Function<Claims, T> claimResolver) {
-        final Claims claims = extractAllClaims(token);
-        return claimResolver.apply(claims);
+    public String extractUserId(String token) {
+        return extractClaim(token, claims -> claims.get("userId").toString());
     }
 
-    private Claims extractAllClaims(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(getSignKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+    public String extractUserRole(String token) {
+        return extractClaim(token, claims -> claims.get("role").toString());
+    }
+
+    public Date extractExpiration(String token) {
+        return extractClaim(token, Claims::getExpiration);
     }
 
     public boolean validateToken(String token, User user) {
@@ -65,15 +64,16 @@ public class JwtService {
         return extractExpiration(token).before(new Date());
     }
 
-    public Date extractExpiration(String token) {
-        return extractClaim(token, Claims::getExpiration);
+    public <T> T extractClaim(String token, Function<Claims, T> claimResolver) {
+        final Claims claims = extractAllClaims(token);
+        return claimResolver.apply(claims);
     }
 
-    public String extractUserRole(String token) {
-        return extractClaim(token, claims -> claims.get("role").toString());
-    }
-
-    public String extractUserId(String token) {  // 👈 New Method to extract userId
-        return extractClaim(token, claims -> claims.get("userId").toString());
+    private Claims extractAllClaims(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(getSignKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
     }
 }

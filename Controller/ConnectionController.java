@@ -18,54 +18,44 @@ public class ConnectionController {
 
     private final ConnectionService connectionService;
 
-    @PostMapping("/send")
-    public ResponseEntity<Connection> sendRequest(
-            @RequestParam String senderId,
-            @RequestParam String receiverId
-    ){
-        return ResponseEntity.ok(connectionService.sendRequest(senderId,receiverId));
-
-    }
+    // ✅ Respond to request (authenticated user only)
     @PostMapping("/{requestId}/respond")
     public ResponseEntity<Connection> respondToRequestSecure(
             @PathVariable String requestId,
-            @RequestParam String action,
-            @RequestParam String userId
+            @RequestParam String action
     ) {
+        String userId = getAuthenticatedUserId();
         return ResponseEntity.ok(connectionService.respondToRequestSecure(requestId, action, userId));
     }
+
+    // ✅ Get friends of a specific user
     @GetMapping("/{userId}/friends")
     public ResponseEntity<List<User>> getUserConnections(@PathVariable String userId) {
         List<User> connections = connectionService.getUserConnections(userId);
         return ResponseEntity.ok(connections);
     }
 
+    // ✅ Get pending requests (only for logged-in user)
     @GetMapping("/pending")
-    public ResponseEntity<List<Connection>> getPendingRequests(Authentication authentication) {
-        // Assuming your JWT Authentication stores userId as the username
-        String currentUserId = authentication.getName();
+    public ResponseEntity<List<Connection>> getPendingRequests() {
+        String currentUserId = getAuthenticatedUserId();
         return ResponseEntity.ok(connectionService.getPendingRequestsSecure(currentUserId));
     }
 
-
-    @PostMapping("/request")
+    // ✅ Send request (authenticated user as sender)
+    @PostMapping("/send")
     public ResponseEntity<Connection> sendRequest(@RequestParam String receiverId) {
         String senderId = getAuthenticatedUserId();
         Connection connection = connectionService.sendRequest(senderId, receiverId);
         return ResponseEntity.ok(connection);
     }
 
-    @PostMapping("/respond/{requestId}")
-    public ResponseEntity<Connection> respondToRequest(@PathVariable String requestId,
-                                                       @RequestParam String action) {
-        String userId = getAuthenticatedUserId();
-        Connection connection = connectionService.respondToRequestSecure(requestId, action, userId);
-        return ResponseEntity.ok(connection);
-    }
-
+    // ✅ Extract userId from authenticated principal
     private String getAuthenticatedUserId() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return authentication.getName(); // Or custom logic from your UserDetails
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal instanceof User) {
+            return ((User) principal).getId(); // Directly get DB ID
+        }
+        throw new RuntimeException("User not authenticated or invalid principal");
     }
-
 }
