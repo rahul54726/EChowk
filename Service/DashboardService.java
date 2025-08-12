@@ -1,47 +1,46 @@
 package com.EChowk.EChowk.Service;
 
 import com.EChowk.EChowk.Repository.*;
+import com.EChowk.EChowk.enums.ConnectionStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 public class DashboardService {
+
     private final SkillOfferRepo skillOfferRepo;
     private final RequestRepo requestRepo;
     private final ReviewRepo reviewRepo;
-//    public DashboardStatsDto getUserStats(String userId) {
-//        int totalSkills = skillRepo.countByUserId(userId);
-//        int totalOffers = skillOfferRepo.findByUserId(userId).size();
-//        int totalRequests = requestRepo.findByRequester_Id(userId).size();
-//        double rating = userRepo.findById(userId)
-//                .map(user -> user.getAverageRating() != null ? user.getAverageRating() : 0.0)
-//                .orElse(0.0);
-//
-//        return DashboardStatsDto.builder()
-//                .totalSkills(totalSkills)
-//                .totalOffers(totalOffers)
-//                .totalRequests(totalRequests)
-//                .averageRating(rating)
-//                .build();
-//    }
-public Map<String, Object> getUserStats(String userId) {
-    long totalOffers = skillOfferRepo.countByUser_Id(userId);
-    long totalRequests = requestRepo.countByRequester_Id(userId);
-    long reviewsGiven = reviewRepo.countByReviewer_Id(userId);
+    private final ConnectionRepo connectionRepo;
 
-    long acceptedRequests = requestRepo.findByRequester_Id(userId).stream()
-            .filter(req -> "ACCEPTED".equalsIgnoreCase(req.getStatus()))
-            .count();
+    public Map<String, Object> getUserStats(String userId) {
 
-    return Map.of(
-            "totalOffers", totalOffers,
-            "totalRequests", totalRequests,
-            "acceptedRequests", acceptedRequests,
-            "reviewsGiven", reviewsGiven
-    );
-}
+        // Skills shared by user
+        long skillsShared = skillOfferRepo.countByUser_Id(userId);
 
+        // Active requests (pending or in progress)
+        long activeRequests = requestRepo.countByRequester_IdAndStatusIn(
+                userId,
+                List.of("PENDING", "IN_PROGRESS")
+        );
+
+        // Total accepted connections
+        long totalConnections = connectionRepo
+                .countBySenderIdOrReceiverIdAndStatus(userId, userId, ConnectionStatus.ACCEPTED);
+
+        // Average rating
+        Double avgRating = reviewRepo.getAverageRatingForUser(userId);
+        avgRating = (avgRating != null) ? avgRating : 0.0;
+
+        return Map.of(
+                "skillsShared", skillsShared,
+                "connections", totalConnections,
+                "activeRequests", activeRequests,
+                "averageRating", avgRating
+        );
+    }
 }

@@ -14,4 +14,5 @@ public interface ConnectionRepo extends MongoRepository<Connection, String> {
     Optional<Connection> findBySenderIdAndReceiverId(String senderId,String receiverId);
     List<Connection> findBySenderIdOrReceiverIdAndStatus(String senderId, String receiverId ,ConnectionStatus status);
 
+    long countBySenderIdOrReceiverIdAndStatus(String userId, String userId1, ConnectionStatus connectionStatus);
 }
