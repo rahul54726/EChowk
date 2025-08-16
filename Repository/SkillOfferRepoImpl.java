@@ -25,7 +25,8 @@ public class SkillOfferRepoImpl implements SkillOfferRepoCustom {
         Query query = new Query();
 
         if (skillName != null && !skillName.isEmpty()) {
-            query.addCriteria(Criteria.where("title").regex(skillName, "i"));
+            // Filter by skill name using the skill reference
+            query.addCriteria(Criteria.where("skill.name").regex(skillName, "i"));
         }
 
         if (status != null && !status.isEmpty()) {

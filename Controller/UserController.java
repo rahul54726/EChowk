@@ -5,6 +5,7 @@ import com.EChowk.EChowk.Repository.UserRepo;
 import com.EChowk.EChowk.Service.JwtService;
 import com.EChowk.EChowk.Service.UserService;
 import com.EChowk.EChowk.dto.UserDto;
+import com.EChowk.EChowk.dto.UserProfileDto;
 import com.EChowk.EChowk.dto.UserUpdateRequest;
 import com.EChowk.EChowk.utils.DtoMapper;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,14 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import com.EChowk.EChowk.Entity.Skill;
+import com.EChowk.EChowk.Entity.SkillOffer;
+import com.EChowk.EChowk.dto.SkillDto;
+import com.EChowk.EChowk.dto.SkillOfferDto;
+
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -49,6 +58,12 @@ public class UserController {
         User user = userService.getUserByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         return ResponseEntity.ok(DtoMapper.toUserDto(user));
+    }
+
+    @GetMapping("/{userId}/profile")
+    public ResponseEntity<UserProfileDto> getUserProfile(@PathVariable String userId) {
+        UserProfileDto profile = userService.getUserProfile(userId);
+        return ResponseEntity.ok(profile);
     }
 
     @DeleteMapping("/{id}")
@@ -89,5 +104,25 @@ public class UserController {
         String userId = jwtService.extractUserId(jwt);
         User updatedUser = userService.uploadProfilePicture(userId, file);
         return ResponseEntity.ok(DtoMapper.toUserDto(updatedUser));
+    }
+
+    @GetMapping("/{userId}/skills")
+    public ResponseEntity<List<SkillDto>> getUserSkills(@PathVariable String userId) {
+        List<Skill> skills = userService.getUserSkills(userId);
+        List<SkillDto> skillDtos = skills.stream().map(DtoMapper::toSkillDto).collect(Collectors.toList());
+        return ResponseEntity.ok(skillDtos);
+    }
+
+    @GetMapping("/{userId}/offers")
+    public ResponseEntity<List<SkillOfferDto>> getUserOffers(@PathVariable String userId) {
+        List<SkillOffer> offers = userService.getUserOffers(userId);
+        List<SkillOfferDto> offerDtos = offers.stream().map(DtoMapper::toSkillOfferDto).collect(Collectors.toList());
+        return ResponseEntity.ok(offerDtos);
+    }
+
+    @GetMapping("/{userId}/stats")
+    public ResponseEntity<Map<String, Object>> getUserStats(@PathVariable String userId) {
+        Map<String, Object> stats = userService.getUserStats(userId);
+        return ResponseEntity.ok(stats);
     }
 }

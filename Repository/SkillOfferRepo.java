@@ -18,6 +18,8 @@ public interface SkillOfferRepo extends MongoRepository<SkillOffer, String> ,Ski
 
     long countByUser_Id(String userId);
 
+    long countByUser_IdAndStatus(String userId, String status);
+
     void deleteByUserId(String id);
     List<SkillOffer> findByTitleContainingIgnoreCase(String title);
     List<SkillOffer> findByDescriptionContainingIgnoreCase(String description);

@@ -31,9 +31,7 @@ public class SkillOfferController {
 
     @GetMapping("/user/{userId}")
     public ResponseEntity<?> getOffersByUser(@PathVariable String userId){
-        return new ResponseEntity<>(skillOfferService.getOfferByUserId(userId).stream()
-                .map(DtoMapper::toSkillOfferDto)
-                .collect(Collectors.toList()),HttpStatus.OK);
+        return new ResponseEntity<>(skillOfferService.getOfferByUserId(userId), HttpStatus.OK);
     }
 //    @GetMapping
 //    public ResponseEntity<?> getAllSkillOffers() {

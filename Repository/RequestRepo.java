@@ -12,4 +12,5 @@ public interface RequestRepo extends MongoRepository<Request, String> {
 
     void deleteByRequesterId(String id);
     long countByRequester_IdAndStatusIn(String userId, List<String> pending);
+    long countBySkillOffer_User_IdAndStatusIn(String userId, List<String> statuses);
 }

@@ -76,22 +76,25 @@ public class SkillOfferService {
      * Get skill offers by a specific user
      */
     @Cacheable(value = "userSkillOffers", key = "#userId")
-    public List<SkillOffer> getOfferByUserId(String userId) {
-        return skillOfferRepo.findByUserId(userId);
+    public List<SkillOfferDto> getOfferByUserId(String userId) {
+        List<SkillOffer> offers = skillOfferRepo.findByUserId(userId);
+        return offers.stream().map(DtoMapper::toSkillOfferDto).collect(Collectors.toList());
     }
 
     /**
      * Get all available skill offers
      */
-    public List<SkillOffer> getAvailableOffers() {
-        return skillOfferRepo.findByAvailability(true);
+    public List<SkillOfferDto> getAvailableOffers() {
+        List<SkillOffer> offers = skillOfferRepo.findByAvailability(true);
+        return offers.stream().map(DtoMapper::toSkillOfferDto).collect(Collectors.toList());
     }
 
     /**
      * Get available skill offers by a specific user
      */
-    public List<SkillOffer> getAvailableOffersByUser(String userId) {
-        return skillOfferRepo.findByUserIdAndAvailability(userId, true);
+    public List<SkillOfferDto> getAvailableOffersByUser(String userId) {
+        List<SkillOffer> offers = skillOfferRepo.findByUserIdAndAvailability(userId, true);
+        return offers.stream().map(DtoMapper::toSkillOfferDto).collect(Collectors.toList());
     }
 
     /**

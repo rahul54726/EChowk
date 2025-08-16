@@ -16,7 +16,7 @@ public class SkillOfferDto {
 
     private String userId;
     private String userName;
-    private String userAvatar;
+    private String profilePictureUrl;
 
     private boolean availability;
     private int maxStudents;

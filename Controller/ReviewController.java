@@ -18,21 +18,22 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ReviewController {
     private final ReviewService reviewService;
+    
     @PostMapping
     public ResponseEntity<?> createReview(@RequestBody ReviewDto reviewDto){
         var createdReview = reviewService.createReview(reviewDto);
         return new ResponseEntity<>(DtoMapper.toReviewDto(createdReview), HttpStatus.OK);
     }
+    
     @GetMapping("/offers/{offerId}")
     public ResponseEntity<?> getReviewsByOffer(@PathVariable String offerId){
-       var reviews =  reviewService.getReviewsForOffer(offerId).stream().map(DtoMapper::toReviewDto).collect(Collectors.toList());
-       return new ResponseEntity<>(reviews,HttpStatus.OK);
+       var reviews = reviewService.getReviewsForOffer(offerId);
+       return new ResponseEntity<>(reviews, HttpStatus.OK);
     }
-    @GetMapping("/stats/{offersId}")
+    
+    @GetMapping("/stats/{offerId}")
     public ResponseEntity<?> getReviewStats(@PathVariable String offerId){
-        List<Review> reviews = reviewService.getReviewsForOffer(offerId);
-        double avgRating = reviews.stream().mapToInt(Review::getRating).average().orElse(0.0);
-        int totalReviews = reviews.size();
-        return  new ResponseEntity<>(Map.of("averageRating",avgRating,"totalReviews",totalReviews),HttpStatus.OK);
+        Map<String, Object> stats = reviewService.getReviewStats(offerId);
+        return new ResponseEntity<>(stats, HttpStatus.OK);
     }
 }

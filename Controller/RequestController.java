@@ -27,19 +27,13 @@ public class RequestController {
 
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<RequestDto>> getRequestsByUser(@PathVariable String userId) {
-        List<RequestDto> requests = requestService.getRequestsByUser(userId)
-                .stream()
-                .map(DtoMapper::toRequestDto)
-                .collect(Collectors.toList());
+        List<RequestDto> requests = requestService.getRequestsByUser(userId);
         return ResponseEntity.ok(requests);
     }
 
     @GetMapping("/offer/{offerId}")
     public ResponseEntity<List<RequestDto>> getRequestsByOffer(@PathVariable String offerId) {
-        List<RequestDto> requests = requestService.getRequestsByOffer(offerId)
-                .stream()
-                .map(DtoMapper::toRequestDto)
-                .collect(Collectors.toList());
+        List<RequestDto> requests = requestService.getRequestsByOffer(offerId);
         return ResponseEntity.ok(requests);
     }
 

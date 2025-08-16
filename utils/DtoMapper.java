@@ -21,6 +21,21 @@ public class DtoMapper {
                 .build();
     }
 
+    public static UserProfileDto toUserProfileDto(User user) {
+        if (user == null) return null;
+
+        return UserProfileDto.builder()
+                .id(user.getId())
+                .name(user.getName())
+                .email(user.getEmail())
+                .bio(user.getBio())
+                .location(user.getLocation())
+                .averageRating(user.getAverageRating())
+                .profilePictureUrl(user.getProfilePictureUrl())
+                .role(user.getRole() != null ? user.getRole().toString() : "USER")
+                .build();
+    }
+
     public static SkillDto toSkillDto(Skill skill) {
         if (skill == null) return null;
 
@@ -43,7 +58,7 @@ public class DtoMapper {
                 .skillName(skill != null ? skill.getName() : "Unknown Skill")
                 .userId(user != null ? user.getId() : null)
                 .userName(user != null ? user.getName() : "Unknown User")
-                .userAvatar(null)
+                .profilePictureUrl(user != null ? user.getProfilePictureUrl() : null)
                 .availability(offer.getAvailability())
                 .maxStudents(offer.getMaxStudents())
                 .currentStudents(offer.getCurrentStudents())

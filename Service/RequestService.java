@@ -7,13 +7,16 @@ import com.EChowk.EChowk.Repository.RequestRepo;
 import com.EChowk.EChowk.Repository.SkillOfferRepo;
 import com.EChowk.EChowk.Repository.UserRepo;
 import com.EChowk.EChowk.dto.RequestCreationDto;
+import com.EChowk.EChowk.dto.RequestDto;
 import com.EChowk.EChowk.exception.ResourceNotFoundException;
+import com.EChowk.EChowk.utils.DtoMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -54,13 +57,16 @@ public class RequestService {
         return saved;
     }
 
-    public List<Request> getRequestsByUser(String userId) {
-        return requestRepo.findByRequester_Id(userId);
+    public List<RequestDto> getRequestsByUser(String userId) {
+        List<Request> requests = requestRepo.findByRequester_Id(userId);
+        return requests.stream().map(DtoMapper::toRequestDto).collect(Collectors.toList());
     }
 
-    public List<Request> getRequestsByOffer(String offerId) {
-        return requestRepo.findBySkillOffer_Id(offerId);
+    public List<RequestDto> getRequestsByOffer(String offerId) {
+        List<Request> requests = requestRepo.findBySkillOffer_Id(offerId);
+        return requests.stream().map(DtoMapper::toRequestDto).collect(Collectors.toList());
     }
+    
     @Transactional
     @CacheEvict(value = "skillOffers", allEntries = true)
     public void updateRequestStatus(String requestId, String status) {

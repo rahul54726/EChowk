@@ -15,8 +15,15 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import com.EChowk.EChowk.Entity.Skill;
+import com.EChowk.EChowk.Entity.SkillOffer;
+import com.EChowk.EChowk.enums.ConnectionStatus;
+import com.EChowk.EChowk.dto.UserProfileDto;
+import com.EChowk.EChowk.utils.DtoMapper;
 
 @Slf4j
 @Service
@@ -32,6 +39,7 @@ public class UserService {
     private final EmailService emailService;
     private final CloudinaryUploadService cloudinaryUploadService;
     private final PasswordEncoder passwordEncoder;
+    private final ConnectionRepo connectionRepo;
 
     public User registerUser(User user) {
         Optional<User> existing = userRepo.findByEmail(user.getEmail());
@@ -172,5 +180,52 @@ public class UserService {
         String imageUrl = cloudinaryUploadService.uploadProfilePicture(file, userId);
         user.setProfilePictureUrl(imageUrl);
         return userRepo.save(user);
+    }
+
+    /**
+     * Get user profile data for profile page
+     */
+    public UserProfileDto getUserProfile(String userId) {
+        User user = userRepo.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        return DtoMapper.toUserProfileDto(user);
+    }
+
+    /**
+     * Get skills for a specific user
+     */
+    public List<Skill> getUserSkills(String userId) {
+        return skillRepo.findByUserId(userId);
+    }
+
+    /**
+     * Get skill offers for a specific user
+     */
+    public List<SkillOffer> getUserOffers(String userId) {
+        return skillOfferRepo.findByUserId(userId);
+    }
+
+    /**
+     * Get comprehensive user statistics for profile page
+     */
+    public Map<String, Object> getUserStats(String userId) {
+        User user = userRepo.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        
+        int totalSkills = skillRepo.countByUserId(userId);
+        int totalOffers = skillOfferRepo.findByUserId(userId).size();
+        int totalStudents = skillOfferRepo.findByUserId(userId).stream()
+                .mapToInt(SkillOffer::getCurrentStudents)
+                .sum();
+        int totalConnections = connectionRepo.findBySenderIdOrReceiverIdAndStatus(userId, userId, ConnectionStatus.ACCEPTED).size();
+        
+        return Map.of(
+            "totalSkills", totalSkills,
+            "totalOffers", totalOffers,
+            "totalStudents", totalStudents,
+            "totalConnections", totalConnections,
+            "averageRating", user.getAverageRating(),
+            "totalReviews", reviewRepo.countByReviewer_Id(userId)
+        );
     }
 }
