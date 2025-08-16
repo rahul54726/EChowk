@@ -1,45 +1,63 @@
-﻿# 🛠 EChowk - Peer-to-Peer Skill Exchange Platform
+# 🛠 EChowk - Peer-to-Peer Skill Exchange Platform
 
-Welcome to **EChowk**, a full-stack Peer-to-Peer Skill Exchange Platform where users can offer skills they are proficient in and learn new skills by exchanging sessions with other users. The platform is built with a robust backend using the Spring Boot framework.
+Welcome to **EChowk**, an open-source full-stack **Peer-to-Peer Skill Exchange Platform** where users can offer skills they are proficient in and learn new skills by exchanging sessions with others.  
+
+The backend is built with **Spring Boot**, ensuring scalability, performance, and security.
+
+---
 
 ## 🚀 Features
 
-* **🧑‍🎓 User Registration & Authentication**: Secure user sign-up and login using JWT (JSON Web Tokens).
-* **🗂️ Role-Based Authorization**: Distinct roles for `User` and `Admin` with different levels of access.
-* **✍️ Skill Offer Management**: Users can create, update, and delete their skill offerings.
-* **📩 Skill Request System**: Users can request to learn a skill, with an accept/reject flow for the skill provider.
-* **⭐ Review & Rating System**: A comprehensive review and rating system for completed skill exchange sessions.
-* **🖼️ Profile Picture Uploads**: Seamless integration with Cloudinary for handling image uploads and storage.
-* **📥 Email Notifications**: Automated email notifications for new skill requests and password reset functionality.
-* **⚡ Redis Caching**: Enhanced performance by caching frequently accessed skill offers.
-* **🔒 Global Exception Handling**: Centralized and custom error handling for a better user experience.
-* **📝 API Documentation**: Interactive API documentation provided using Swagger.
+- **🧑‍🎓 User Registration & Authentication**  
+  Secure sign-up and login using JWT (JSON Web Tokens).  
+
+- **🗂️ Role-Based Authorization**  
+  Distinct roles for `User` and `Admin` with different levels of access.  
+
+- **✍️ Skill Offer Management**  
+  Create, update, and delete skill offerings.  
+
+- **📩 Skill Request System**  
+  Users can request to learn a skill with an accept/reject flow for providers.  
+
+- **⭐ Review & Rating System**  
+  Comprehensive feedback system for completed sessions.  
+
+- **🖼️ Profile Picture Uploads**  
+  Integrated with **Cloudinary** for image storage.  
+
+- **📥 Email Notifications**  
+  Automated email notifications for requests and password resets.  
+
+- **⚡ Redis Caching**  
+  Faster access to frequently used skill offers.  
+
+- **🔒 Global Exception Handling**  
+  Centralized error handling for consistency.  
+
+- **📝 API Documentation**  
+  Interactive API docs with **Swagger**.  
 
 ---
+
 ## 🧑‍💻 Tech Stack
 
-| Category | Technology / Service |
-| :--- | :--- |
-| **Backend** | `Spring Boot`, `Spring Security`, `Spring Data MongoDB` |
-| **Database** | `MongoDB` |
-| **Cache** | `Redis` |
-| **Services** | `Cloudinary` (for Image Storage), `JavaMail Sender` (for SMTP) |
-| **API & Docs**| `RESTful APIs`, `JWT` (for Authentication), `Swagger` (for Documentation) |
-| **Frontend** | *(Optional: The backend is ready to be integrated with any modern frontend like Next.js or React)* |
+| Category      | Technology / Service |
+|---------------|----------------------|
+| **Backend**   | `Spring Boot`, `Spring Security`, `Spring Data MongoDB` |
+| **Database**  | `MongoDB` |
+| **Cache**     | `Redis` |
+| **Services**  | `Cloudinary` (Image Storage), `JavaMail Sender` (SMTP) |
+| **API & Docs**| `REST APIs`, `JWT` (Auth), `Swagger` |
+| **Frontend**  | *(Backend-ready for React, Next.js, or any frontend framework)* |
 
 ---
+
 ## 📦 Installation & Run (Backend)
 
-Follow these steps to get the backend server up and running on your local machine.
+Follow these steps to set up the project locally:
 
-#### 1️⃣ Clone the Repository
+### 1️⃣ Clone the Repository
 ```bash
-git clone [https://github.com/rahul54726/EChowk.git](https://github.com/rahul54726/EChowk.git)
+git clone https://github.com/rahul54726/EChowk.git
 cd EChowk
-
-## License
-This project is licensed under the [MIT License](LICENSE).
-
-## Contributing
-We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details.
-
