@@ -33,7 +33,7 @@ public class SkillOfferController {
     public ResponseEntity<?> getOffersByUser(@PathVariable String userId){
         return new ResponseEntity<>(skillOfferService.getOfferByUserId(userId), HttpStatus.OK);
     }
-//    @GetMapping
+    //    @GetMapping
 //    public ResponseEntity<?> getAllSkillOffers() {
 //        List<SkillOfferDto> offers = skillOfferService.getAllOffers();
 //        return new ResponseEntity<>(offers,HttpStatus.OK);

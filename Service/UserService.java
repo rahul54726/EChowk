@@ -211,21 +211,21 @@ public class UserService {
     public Map<String, Object> getUserStats(String userId) {
         User user = userRepo.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        
+
         int totalSkills = skillRepo.countByUserId(userId);
         int totalOffers = skillOfferRepo.findByUserId(userId).size();
         int totalStudents = skillOfferRepo.findByUserId(userId).stream()
                 .mapToInt(SkillOffer::getCurrentStudents)
                 .sum();
         int totalConnections = connectionRepo.findBySenderIdOrReceiverIdAndStatus(userId, userId, ConnectionStatus.ACCEPTED).size();
-        
+
         return Map.of(
-            "totalSkills", totalSkills,
-            "totalOffers", totalOffers,
-            "totalStudents", totalStudents,
-            "totalConnections", totalConnections,
-            "averageRating", user.getAverageRating(),
-            "totalReviews", reviewRepo.countByReviewer_Id(userId)
+                "totalSkills", totalSkills,
+                "totalOffers", totalOffers,
+                "totalStudents", totalStudents,
+                "totalConnections", totalConnections,
+                "averageRating", user.getAverageRating(),
+                "totalReviews", reviewRepo.countByReviewer_Id(userId)
         );
     }
 }

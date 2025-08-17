@@ -26,9 +26,9 @@ public class Review {
 
     @DBRef
     private SkillOffer skillOffer;
-    
+
     // Add field to track who is being reviewed (the skill offer creator)
     private String reviewedUserId;
-    
+
     private LocalDateTime createdAt = LocalDateTime.now();
 }

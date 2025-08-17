@@ -66,7 +66,7 @@ public class RequestService {
         List<Request> requests = requestRepo.findBySkillOffer_Id(offerId);
         return requests.stream().map(DtoMapper::toRequestDto).collect(Collectors.toList());
     }
-    
+
     @Transactional
     @CacheEvict(value = "skillOffers", allEntries = true)
     public void updateRequestStatus(String requestId, String status) {

@@ -25,7 +25,7 @@ public class ReviewService {
     private final ReviewRepo reviewRepo;
     private final UserRepo userRepo;
     private final SkillOfferRepo skillOfferRepo;
-    
+
     @Transactional
     public Review createReview(ReviewDto dto){
         User reviewer = userRepo.findById(dto.getReviewerId()).orElseThrow(() -> new ResourceNotFoundException("Reviewer Not Found"));
@@ -47,20 +47,20 @@ public class ReviewService {
         skillOfferRepo.save(offer);
         return review;
     }
-    
+
     public List<ReviewDto> getReviewsForOffer(String offerId){
         List<Review> reviews = reviewRepo.findBySkillOffer_Id(offerId);
         return reviews.stream().map(DtoMapper::toReviewDto).collect(Collectors.toList());
     }
-    
+
     public Map<String, Object> getReviewStats(String offerId) {
         List<Review> reviews = reviewRepo.findBySkillOffer_Id(offerId);
         double averageRating = reviews.stream().mapToInt(Review::getRating).average().orElse(0.0);
         int totalReviews = reviews.size();
-        
+
         return Map.of(
-            "averageRating", averageRating,
-            "totalReviews", totalReviews
+                "averageRating", averageRating,
+                "totalReviews", totalReviews
         );
     }
 }
